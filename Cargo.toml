@@ -7,3 +7,9 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+crossterm = "0.14"
+tui = { version = "0.8", default-features = false, features = ['crossterm'] }
+structopt = "0.3.7"
+rand = "0.7.2"
+stderrlog = "0.4.3"
+failure = "0.1"
