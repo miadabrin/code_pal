@@ -12,7 +12,6 @@ fn main() {
 */
 
 use code_pal::demo;
-use code_pal::util;
 
 use std::{
     io::{stdout, Write},
