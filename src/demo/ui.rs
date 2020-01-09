@@ -5,8 +5,8 @@ use tui::layout::{Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Modifier, Style};
 use tui::widgets::canvas::{Canvas, Line, Map, MapResolution, Rectangle};
 use tui::widgets::{
-    Axis, BarChart, Block, Borders, Chart, Dataset, Gauge, List, Marker, Paragraph, Row,
-    SelectableList, Sparkline, Table, Tabs, Text, Widget,
+    BarChart, Block, Borders, Gauge, List, Paragraph, Row, SelectableList, Sparkline, Table, Tabs,
+    Text, Widget,
 };
 use tui::{Frame, Terminal};
 
