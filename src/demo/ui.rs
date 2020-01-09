@@ -3,7 +3,6 @@ use std::io;
 use tui::backend::Backend;
 use tui::layout::{Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Modifier, Style};
-use tui::widgets::canvas::{Canvas, Line, Map, MapResolution, Rectangle};
 use tui::widgets::{
     BarChart, Block, Borders, Gauge, List, Paragraph, Row, SelectableList, Sparkline, Table, Tabs,
     Text, Widget,
@@ -179,7 +178,7 @@ where
     B: Backend,
 {
     let chunks = Layout::default()
-        .constraints([Constraint::Percentage(30), Constraint::Percentage(70)].as_ref())
+        .constraints([Constraint::Percentage(100)].as_ref())
         .direction(Direction::Horizontal)
         .split(area);
     let up_style = Style::default().fg(Color::Green);
@@ -204,45 +203,4 @@ where
             Constraint::Length(10),
         ])
         .render(f, chunks[0]);
-
-    Canvas::default()
-        .block(Block::default().title("World").borders(Borders::ALL))
-        .paint(|ctx| {
-            ctx.draw(&Map {
-                color: Color::White,
-                resolution: MapResolution::High,
-            });
-            ctx.layer();
-            ctx.draw(&Rectangle {
-                rect: Rect {
-                    x: 0,
-                    y: 30,
-                    width: 10,
-                    height: 10,
-                },
-                color: Color::Yellow,
-            });
-            for (i, s1) in app.servers.iter().enumerate() {
-                for s2 in &app.servers[i + 1..] {
-                    ctx.draw(&Line {
-                        x1: s1.coords.1,
-                        y1: s1.coords.0,
-                        y2: s2.coords.0,
-                        x2: s2.coords.1,
-                        color: Color::Yellow,
-                    });
-                }
-            }
-            for server in &app.servers {
-                let color = if server.status == "Up" {
-                    Color::Green
-                } else {
-                    Color::Red
-                };
-                ctx.print(server.coords.1, server.coords.0, "X", color);
-            }
-        })
-        .x_bounds([-180.0, 180.0])
-        .y_bounds([-90.0, 90.0])
-        .render(f, chunks[1]);
 }
