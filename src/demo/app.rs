@@ -128,7 +128,6 @@ pub struct App<'a> {
     pub title: &'a str,
     pub should_quit: bool,
     pub tabs: TabsState<'a>,
-    pub show_chart: bool,
     pub progress: u16,
     pub sparkline: Signal<RandomSignal>,
     pub tasks: ListState<&'a str>,
@@ -150,7 +149,6 @@ impl<'a> App<'a> {
             title,
             should_quit: false,
             tabs: TabsState::new(vec!["Tab0", "Tab1"]),
-            show_chart: true,
             progress: 0,
             sparkline: Signal {
                 source: rand_signal,
@@ -222,9 +220,6 @@ impl<'a> App<'a> {
         match c {
             'q' => {
                 self.should_quit = true;
-            }
-            't' => {
-                self.show_chart = !self.show_chart;
             }
             _ => {}
         }

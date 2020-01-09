@@ -85,11 +85,7 @@ fn draw_charts<B>(f: &mut Frame<B>, app: &App, area: Rect)
 where
     B: Backend,
 {
-    let constraints = if app.show_chart {
-        vec![Constraint::Percentage(50), Constraint::Percentage(50)]
-    } else {
-        vec![Constraint::Percentage(100)]
-    };
+    let constraints = vec![Constraint::Percentage(100)];
     let chunks = Layout::default()
         .constraints(constraints)
         .direction(Direction::Horizontal)
@@ -142,48 +138,6 @@ where
             )
             .label_style(Style::default().fg(Color::Yellow))
             .style(Style::default().fg(Color::Green))
-            .render(f, chunks[1]);
-    }
-    if app.show_chart {
-        Chart::default()
-            .block(
-                Block::default()
-                    .title("Chart")
-                    .title_style(Style::default().fg(Color::Cyan).modifier(Modifier::BOLD))
-                    .borders(Borders::ALL),
-            )
-            .x_axis(
-                Axis::default()
-                    .title("X Axis")
-                    .style(Style::default().fg(Color::Gray))
-                    .labels_style(Style::default().modifier(Modifier::ITALIC))
-                    .bounds(app.signals.window)
-                    .labels(&[
-                        &format!("{}", app.signals.window[0]),
-                        &format!("{}", (app.signals.window[0] + app.signals.window[1]) / 2.0),
-                        &format!("{}", app.signals.window[1]),
-                    ]),
-            )
-            .y_axis(
-                Axis::default()
-                    .title("Y Axis")
-                    .style(Style::default().fg(Color::Gray))
-                    .labels_style(Style::default().modifier(Modifier::ITALIC))
-                    .bounds([-20.0, 20.0])
-                    .labels(&["-20", "0", "20"]),
-            )
-            .datasets(&[
-                Dataset::default()
-                    .name("data2")
-                    .marker(Marker::Dot)
-                    .style(Style::default().fg(Color::Cyan))
-                    .data(&app.signals.sin1.points),
-                Dataset::default()
-                    .name("data3")
-                    .marker(Marker::Braille)
-                    .style(Style::default().fg(Color::Yellow))
-                    .data(&app.signals.sin2.points),
-            ])
             .render(f, chunks[1]);
     }
 }
