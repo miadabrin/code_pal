@@ -3,10 +3,7 @@ use std::io;
 use tui::backend::Backend;
 use tui::layout::{Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Modifier, Style};
-use tui::widgets::{
-    BarChart, Block, Borders, Gauge, List, Paragraph, Row, SelectableList, Sparkline, Table, Tabs,
-    Text, Widget,
-};
+use tui::widgets::{Block, Borders, Paragraph, Row, Table, Tabs, Text, Widget};
 use tui::{Frame, Terminal};
 
 use crate::demo::App;
@@ -24,121 +21,21 @@ pub fn draw<B: Backend>(terminal: &mut Terminal<B>, app: &App) -> Result<(), io:
             .select(app.tabs.index)
             .render(&mut f, chunks[0]);
         match app.tabs.index {
-            0 => draw_first_tab(&mut f, &app, chunks[1]),
+            0 => draw_first_tab(&mut f, chunks[1]),
             1 => draw_second_tab(&mut f, &app, chunks[1]),
             _ => {}
         };
     })
 }
 
-fn draw_first_tab<B>(f: &mut Frame<B>, app: &App, area: Rect)
+fn draw_first_tab<B>(f: &mut Frame<B>, area: Rect)
 where
     B: Backend,
 {
     let chunks = Layout::default()
-        .constraints(
-            [
-                Constraint::Length(7),
-                Constraint::Min(7),
-                Constraint::Length(7),
-            ]
-            .as_ref(),
-        )
+        .constraints([Constraint::Min(7)].as_ref())
         .split(area);
-    draw_gauges(f, app, chunks[0]);
-    draw_charts(f, app, chunks[1]);
-    draw_text(f, chunks[2]);
-}
-
-fn draw_gauges<B>(f: &mut Frame<B>, app: &App, area: Rect)
-where
-    B: Backend,
-{
-    let chunks = Layout::default()
-        .constraints([Constraint::Length(2), Constraint::Length(3)].as_ref())
-        .margin(1)
-        .split(area);
-    Block::default()
-        .borders(Borders::ALL)
-        .title("Graphs")
-        .render(f, area);
-    Gauge::default()
-        .block(Block::default().title("Gauge:"))
-        .style(
-            Style::default()
-                .fg(Color::Magenta)
-                .bg(Color::Black)
-                .modifier(Modifier::ITALIC | Modifier::BOLD),
-        )
-        .label(&format!("{} / 100", app.progress))
-        .percent(app.progress)
-        .render(f, chunks[0]);
-    Sparkline::default()
-        .block(Block::default().title("Sparkline:"))
-        .style(Style::default().fg(Color::Green))
-        .data(&app.sparkline.points)
-        .render(f, chunks[1]);
-}
-
-fn draw_charts<B>(f: &mut Frame<B>, app: &App, area: Rect)
-where
-    B: Backend,
-{
-    let constraints = vec![Constraint::Percentage(100)];
-    let chunks = Layout::default()
-        .constraints(constraints)
-        .direction(Direction::Horizontal)
-        .split(area);
-    {
-        let chunks = Layout::default()
-            .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
-            .split(chunks[0]);
-        {
-            let chunks = Layout::default()
-                .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
-                .direction(Direction::Horizontal)
-                .split(chunks[0]);
-            SelectableList::default()
-                .block(Block::default().borders(Borders::ALL).title("List"))
-                .items(&app.tasks.items)
-                .select(Some(app.tasks.selected))
-                .highlight_style(Style::default().fg(Color::Yellow).modifier(Modifier::BOLD))
-                .highlight_symbol(">")
-                .render(f, chunks[0]);
-            let info_style = Style::default().fg(Color::White);
-            let warning_style = Style::default().fg(Color::Yellow);
-            let error_style = Style::default().fg(Color::Magenta);
-            let critical_style = Style::default().fg(Color::Red);
-            let events = app.logs.items.iter().map(|&(evt, level)| {
-                Text::styled(
-                    format!("{}: {}", level, evt),
-                    match level {
-                        "ERROR" => error_style,
-                        "CRITICAL" => critical_style,
-                        "WARNING" => warning_style,
-                        _ => info_style,
-                    },
-                )
-            });
-            List::new(events)
-                .block(Block::default().borders(Borders::ALL).title("List"))
-                .render(f, chunks[1]);
-        }
-        BarChart::default()
-            .block(Block::default().borders(Borders::ALL).title("Bar chart"))
-            .data(&app.barchart)
-            .bar_width(3)
-            .bar_gap(2)
-            .value_style(
-                Style::default()
-                    .fg(Color::Black)
-                    .bg(Color::Green)
-                    .modifier(Modifier::ITALIC),
-            )
-            .label_style(Style::default().fg(Color::Yellow))
-            .style(Style::default().fg(Color::Green))
-            .render(f, chunks[1]);
-    }
+    draw_text(f, chunks[0]);
 }
 
 fn draw_text<B>(f: &mut Frame<B>, area: Rect)
