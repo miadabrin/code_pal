@@ -35,6 +35,7 @@ pub struct App<'a> {
     pub tabs: TabsState<'a>,
     pub tasks: ListState<String>,
     pub servers: Vec<Server<'a>>,
+    pub todo_add_activate: bool,
 }
 
 impl<'a> App<'a> {
@@ -66,6 +67,7 @@ impl<'a> App<'a> {
                     status: "Up",
                 },
             ],
+            todo_add_activate: false,
         }
     }
 
@@ -83,6 +85,14 @@ impl<'a> App<'a> {
 
     pub fn on_left(&mut self) {
         self.tabs.previous();
+    }
+
+    pub fn on_start_add_todo(&mut self) {
+        self.todo_add_activate = true
+    }
+
+    pub fn on_stop_action(&mut self) {
+        self.todo_add_activate = false
     }
 
     pub fn on_key(&mut self, c: char, m: KeyModifiers) {
