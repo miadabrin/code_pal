@@ -82,7 +82,7 @@ where
         .split(area);
     {
         SelectableList::default()
-            .block(Block::default().borders(Borders::ALL).title("List"))
+            .block(Block::default().borders(Borders::ALL).title("Todo List"))
             .items(&app.tasks.items)
             .select(Some(app.tasks.selected))
             .highlight_style(Style::default().fg(Color::Yellow).modifier(Modifier::BOLD))

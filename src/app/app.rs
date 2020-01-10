@@ -1,10 +1,5 @@
 use crate::util::TabsState;
-
-const TASKS: [&'static str; 24] = [
-    "Item1", "Item2", "Item3", "Item4", "Item5", "Item6", "Item7", "Item8", "Item9", "Item10",
-    "Item11", "Item12", "Item13", "Item14", "Item15", "Item16", "Item17", "Item18", "Item19",
-    "Item20", "Item21", "Item22", "Item23", "Item24",
-];
+use std::convert::TryFrom;
 
 pub struct ListState<I> {
     pub items: Vec<I>,
@@ -21,7 +16,7 @@ impl<I> ListState<I> {
         }
     }
     fn select_next(&mut self) {
-        if self.selected < self.items.len() - 1 {
+        if i64::try_from(self.selected).unwrap() < i64::try_from(self.items.len()).unwrap() - 1 {
             self.selected += 1
         }
     }
@@ -38,7 +33,7 @@ pub struct App<'a> {
     pub title: &'a str,
     pub should_quit: bool,
     pub tabs: TabsState<'a>,
-    pub tasks: ListState<&'a str>,
+    pub tasks: ListState<String>,
     pub servers: Vec<Server<'a>>,
 }
 
@@ -48,7 +43,7 @@ impl<'a> App<'a> {
             title,
             should_quit: false,
             tabs: TabsState::new(vec!["Tab0", "Tab1"]),
-            tasks: ListState::new(TASKS.to_vec()),
+            tasks: ListState::new(vec![]),
             servers: vec![
                 Server {
                     name: "NorthAmerica-1",
