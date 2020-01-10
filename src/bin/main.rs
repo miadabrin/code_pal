@@ -11,7 +11,7 @@ fn main() {
 }
 */
 
-use code_pal::demo;
+use code_pal::app;
 
 use std::{
     io::{stdout, Write},
@@ -29,7 +29,7 @@ use crossterm::{
 use structopt::StructOpt;
 use tui::{backend::CrosstermBackend, Terminal};
 
-use crate::demo::{ui, App};
+use crate::app::{ui, App};
 use crossterm::terminal::LeaveAlternateScreen;
 
 enum Event<I> {
@@ -75,7 +75,7 @@ fn main() -> Result<(), failure::Error> {
         }
     });
 
-    let mut app = App::new("Crossterm Demo");
+    let mut app = App::new("Code Pal");
 
     terminal.clear()?;
 

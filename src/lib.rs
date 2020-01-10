@@ -1,5 +1,5 @@
 #[allow(dead_code)]
-pub mod demo;
+pub mod app;
 #[allow(dead_code)]
 pub mod util;
 

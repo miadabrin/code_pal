@@ -6,7 +6,7 @@ use tui::style::{Color, Modifier, Style};
 use tui::widgets::{Block, Borders, Paragraph, Row, Table, Tabs, Text, Widget};
 use tui::{Frame, Terminal};
 
-use crate::demo::App;
+use crate::app::App;
 
 pub fn draw<B: Backend>(terminal: &mut Terminal<B>, app: &App) -> Result<(), io::Error> {
     terminal.draw(|mut f| {
