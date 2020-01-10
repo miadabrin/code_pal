@@ -1,4 +1,5 @@
 use crate::util::TabsState;
+use crossterm::event::KeyModifiers;
 use std::convert::TryFrom;
 
 pub struct ListState<I> {
@@ -84,12 +85,14 @@ impl<'a> App<'a> {
         self.tabs.previous();
     }
 
-    pub fn on_key(&mut self, c: char) {
-        match c {
-            'q' => {
+    pub fn on_key(&mut self, c: char, m: KeyModifiers) {
+        match (c, m) {
+            ('q', KeyModifiers::CONTROL) => {
                 self.should_quit = true;
             }
-            _ => {}
+            _ => {
+                //println!("Hello, world! {:#?}", c);
+            }
         }
     }
 

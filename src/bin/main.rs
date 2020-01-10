@@ -21,7 +21,7 @@ use std::{
 };
 
 use crossterm::{
-    event::{self, Event as CEvent, KeyCode},
+    event::{self, Event as CEvent, KeyCode, KeyModifiers},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen},
 };
@@ -82,19 +82,19 @@ fn main() -> Result<(), failure::Error> {
     loop {
         ui::draw(&mut terminal, &app)?;
         match rx.recv()? {
-            Event::Input(event) => match event.code {
-                KeyCode::Char('q') => {
+            Event::Input(event) => match (event.code, event.modifiers) {
+                (KeyCode::Char('q'), KeyModifiers::CONTROL) => {
                     disable_raw_mode()?;
                     execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
                     terminal.show_cursor()?;
                     break;
                 }
-                KeyCode::Char(c) => app.on_key(c),
-                KeyCode::Left => app.on_left(),
-                KeyCode::Up => app.on_up(),
-                KeyCode::Right => app.on_right(),
-                KeyCode::Down => app.on_down(),
-                _ => {}
+                (KeyCode::Char(c), _) => app.on_key(c, event.modifiers),
+                (KeyCode::Left, _) => app.on_left(),
+                (KeyCode::Up, _) => app.on_up(),
+                (KeyCode::Right, _) => app.on_right(),
+                (KeyCode::Down, _) => app.on_down(),
+                (_, _) => {}
             },
             Event::Tick => {
                 app.on_tick();
