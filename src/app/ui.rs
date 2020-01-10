@@ -43,23 +43,7 @@ fn draw_text<B>(f: &mut Frame<B>, area: Rect)
 where
     B: Backend,
 {
-    let text = [
-        Text::raw("This is a paragraph with several lines. You can change style your text the way you want.\n\nFox example: "),
-        Text::styled("under", Style::default().fg(Color::Red)),
-        Text::raw(" "),
-        Text::styled("the", Style::default().fg(Color::Green)),
-        Text::raw(" "),
-        Text::styled("rainbow", Style::default().fg(Color::Blue)),
-        Text::raw(".\nOh and if you didn't "),
-        Text::styled("notice", Style::default().modifier(Modifier::ITALIC)),
-        Text::raw(" you can "),
-        Text::styled("automatically", Style::default().modifier(Modifier::BOLD)),
-        Text::raw(" "),
-        Text::styled("wrap", Style::default().modifier(Modifier::REVERSED)),
-        Text::raw(" your "),
-        Text::styled("text", Style::default().modifier(Modifier::UNDERLINED)),
-        Text::raw(".\nOne more thing is that it should display unicode characters: 10€")
-    ];
+    let text = [Text::raw("This is a paragraph")];
     Paragraph::new(text.iter())
         .block(
             Block::default()
