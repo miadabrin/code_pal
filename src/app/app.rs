@@ -6,25 +6,6 @@ const TASKS: [&'static str; 24] = [
     "Item20", "Item21", "Item22", "Item23", "Item24",
 ];
 
-pub struct Signal<S: Iterator> {
-    source: S,
-    pub points: Vec<S::Item>,
-    tick_rate: usize,
-}
-
-impl<S> Signal<S>
-where
-    S: Iterator,
-{
-    fn on_tick(&mut self) {
-        for _ in 0..self.tick_rate {
-            self.points.remove(0);
-        }
-        self.points
-            .extend(self.source.by_ref().take(self.tick_rate));
-    }
-}
-
 pub struct ListState<I> {
     pub items: Vec<I>,
     pub selected: usize,
