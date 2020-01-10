@@ -231,14 +231,5 @@ impl<'a> App<'a> {
         if self.progress > 100 {
             self.progress = 0;
         }
-
-        self.sparkline.on_tick();
-        self.signals.on_tick();
-
-        let log = self.logs.items.pop().unwrap();
-        self.logs.items.insert(0, log);
-
-        let event = self.barchart.pop().unwrap();
-        self.barchart.insert(0, event);
     }
 }
