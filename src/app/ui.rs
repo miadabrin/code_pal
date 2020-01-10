@@ -3,7 +3,7 @@ use std::io;
 use tui::backend::Backend;
 use tui::layout::{Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Modifier, Style};
-use tui::widgets::{Block, Borders, Paragraph, Row, Table, Tabs, Text, Widget};
+use tui::widgets::{Block, Borders, Paragraph, Row, SelectableList, Table, Tabs, Text, Widget};
 use tui::{Frame, Terminal};
 
 use crate::app::App;
@@ -21,21 +21,22 @@ pub fn draw<B: Backend>(terminal: &mut Terminal<B>, app: &App) -> Result<(), io:
             .select(app.tabs.index)
             .render(&mut f, chunks[0]);
         match app.tabs.index {
-            0 => draw_first_tab(&mut f, chunks[1]),
+            0 => draw_first_tab(&mut f, &app, chunks[1]),
             1 => draw_second_tab(&mut f, &app, chunks[1]),
             _ => {}
         };
     })
 }
 
-fn draw_first_tab<B>(f: &mut Frame<B>, area: Rect)
+fn draw_first_tab<B>(f: &mut Frame<B>, app: &App, area: Rect)
 where
     B: Backend,
 {
     let chunks = Layout::default()
-        .constraints([Constraint::Min(7)].as_ref())
+        .constraints([Constraint::Length(7), Constraint::Min(7)].as_ref())
         .split(area);
     draw_text(f, chunks[0]);
+    draw_charts(f, app, chunks[1]);
 }
 
 fn draw_text<B>(f: &mut Frame<B>, area: Rect)
@@ -68,6 +69,26 @@ where
         )
         .wrap(true)
         .render(f, area);
+}
+
+fn draw_charts<B>(f: &mut Frame<B>, app: &App, area: Rect)
+where
+    B: Backend,
+{
+    let constraints = vec![Constraint::Percentage(100)];
+    let chunks = Layout::default()
+        .constraints(constraints)
+        .direction(Direction::Horizontal)
+        .split(area);
+    {
+        SelectableList::default()
+            .block(Block::default().borders(Borders::ALL).title("List"))
+            .items(&app.tasks.items)
+            .select(Some(app.tasks.selected))
+            .highlight_style(Style::default().fg(Color::Yellow).modifier(Modifier::BOLD))
+            .highlight_symbol(">")
+            .render(f, chunks[0]);
+    }
 }
 
 fn draw_second_tab<B>(f: &mut Frame<B>, app: &App, area: Rect)
