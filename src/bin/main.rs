@@ -65,13 +65,13 @@ fn main() -> Result<(), failure::Error> {
     thread::spawn(move || {
         loop {
             // poll for tick rate duration, if no events, sent tick event.
-            if event::poll(Duration::from_millis(cli.tick_rate)).unwrap() {
-                if let CEvent::Key(key) = event::read().unwrap() {
-                    tx.send(Event::Input(key)).unwrap();
+            if let Ok(_) = event::poll(Duration::from_millis(cli.tick_rate)) {
+                if let Ok(CEvent::Key(key)) = event::read() {
+                    tx.send(Event::Input(key)).unwrap_or_default();
                 }
             }
 
-            tx.send(Event::Tick).unwrap();
+            tx.send(Event::Tick).unwrap_or_default();
         }
     });
 
