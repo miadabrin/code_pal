@@ -47,7 +47,6 @@ where
         .current_text
         .iter()
         .map(|x| Text::raw(x.clone()))
-        .rev()
         .collect();
     let current_action_title = match app.current_action {
         CodePalAction::AddToDoItem => String::from("Add To Do Item"),

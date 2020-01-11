@@ -97,6 +97,7 @@ fn main() -> Result<(), failure::Error> {
                 (KeyCode::Down, _) => app.on_down(),
                 (KeyCode::Esc, _) => app.on_stop_action(),
                 (KeyCode::Backspace, _) => app.on_backspace(),
+                (KeyCode::Enter, _) => app.on_enter(),
                 (_, _) => {}
             },
             Event::Tick => {

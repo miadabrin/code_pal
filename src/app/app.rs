@@ -42,7 +42,6 @@ pub struct App<'a> {
     pub tabs: TabsState<'a>,
     pub tasks: ListState<String>,
     pub servers: Vec<Server<'a>>,
-    pub todo_add_activate: bool,
 }
 
 impl<'a> App<'a> {
@@ -59,7 +58,6 @@ impl<'a> App<'a> {
                 location: "New York City",
                 status: "Up",
             }],
-            todo_add_activate: false,
         }
     }
 
@@ -80,12 +78,10 @@ impl<'a> App<'a> {
     }
 
     pub fn on_start_add_todo(&mut self) {
-        self.todo_add_activate = true;
         self.current_action = CodePalAction::AddToDoItem;
     }
 
     pub fn on_stop_action(&mut self) {
-        self.todo_add_activate = false;
         self.current_text = vec![String::from("")];
         self.current_action = CodePalAction::None;
     }
@@ -96,19 +92,22 @@ impl<'a> App<'a> {
                 self.should_quit = true;
             }
             _ => {
-                if self.todo_add_activate {
-                    self.current_text[0].push(c);
+                if let CodePalAction::AddToDoItem = self.current_action {
+                    self.current_text
+                        .last_mut()
+                        .expect("Current Text has no item")
+                        .push(c);
                 }
             }
         }
     }
 
     pub fn on_backspace(&mut self) {
-        if self.todo_add_activate {
+        if let CodePalAction::AddToDoItem = self.current_action {
             let last_item = self
                 .current_text
                 .last_mut()
-                .expect("Current Test has no item");
+                .expect("Current Text has no item");
             if last_item.len() > 0 {
                 last_item.pop();
             } else {
@@ -116,6 +115,12 @@ impl<'a> App<'a> {
                     self.current_text.pop();
                 }
             }
+        }
+    }
+
+    pub fn on_enter(&mut self) {
+        if let CodePalAction::AddToDoItem = self.current_action {
+            self.current_text.push(String::from(""));
         }
     }
 
