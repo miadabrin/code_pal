@@ -96,6 +96,7 @@ fn main() -> Result<(), failure::Error> {
                 (KeyCode::Right, _) => app.on_right(),
                 (KeyCode::Down, _) => app.on_down(),
                 (KeyCode::Esc, _) => app.on_stop_action(),
+                (KeyCode::Backspace, _) => app.on_backspace(),
                 (_, _) => {}
             },
             Event::Tick => {

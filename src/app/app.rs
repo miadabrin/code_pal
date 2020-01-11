@@ -54,28 +54,11 @@ impl<'a> App<'a> {
             should_quit: false,
             tabs: TabsState::new(vec!["Tab0", "Tab1"]),
             tasks: ListState::new(vec![]),
-            servers: vec![
-                Server {
-                    name: "NorthAmerica-1",
-                    location: "New York City",
-                    status: "Up",
-                },
-                Server {
-                    name: "Europe-1",
-                    location: "Paris",
-                    status: "Failure",
-                },
-                Server {
-                    name: "SouthAmerica-1",
-                    location: "São Paulo",
-                    status: "Up",
-                },
-                Server {
-                    name: "Asia-1",
-                    location: "Singapore",
-                    status: "Up",
-                },
-            ],
+            servers: vec![Server {
+                name: "NorthAmerica-1",
+                location: "New York City",
+                status: "Up",
+            }],
             todo_add_activate: false,
         }
     }
@@ -116,7 +99,22 @@ impl<'a> App<'a> {
                 if self.todo_add_activate {
                     self.current_text[0].push(c);
                 }
-                //println!("Hello, world! {:#?}", c);
+            }
+        }
+    }
+
+    pub fn on_backspace(&mut self) {
+        if self.todo_add_activate {
+            let last_item = self
+                .current_text
+                .last_mut()
+                .expect("Current Test has no item");
+            if last_item.len() > 0 {
+                last_item.pop();
+            } else {
+                if self.current_text.len() > 1 {
+                    self.current_text.pop();
+                }
             }
         }
     }
