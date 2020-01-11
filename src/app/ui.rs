@@ -46,7 +46,7 @@ where
     let text: Vec<Text> = app
         .current_text
         .iter()
-        .map(|x| Text::raw(x.clone()))
+        .map(|x| Text::raw(format!("{}\n", x)))
         .collect();
     let current_action_title = match app.current_action {
         CodePalAction::AddToDoItem => String::from("Add To Do Item"),
