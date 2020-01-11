@@ -30,6 +30,7 @@ pub struct Server<'a> {
 }
 
 pub struct App<'a> {
+    pub current_text: String,
     pub title: &'a str,
     pub should_quit: bool,
     pub tabs: TabsState<'a>,
@@ -42,6 +43,7 @@ impl<'a> App<'a> {
     pub fn new(title: &'a str) -> App<'a> {
         App {
             title,
+            current_text: String::from(""),
             should_quit: false,
             tabs: TabsState::new(vec!["Tab0", "Tab1"]),
             tasks: ListState::new(vec![]),
@@ -101,6 +103,9 @@ impl<'a> App<'a> {
                 self.should_quit = true;
             }
             _ => {
+                if self.todo_add_activate {
+                    self.current_text.push(c);
+                }
                 //println!("Hello, world! {:#?}", c);
             }
         }

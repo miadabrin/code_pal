@@ -35,15 +35,15 @@ where
     let chunks = Layout::default()
         .constraints([Constraint::Length(7), Constraint::Min(7)].as_ref())
         .split(area);
-    draw_text(f, chunks[0]);
+    draw_text(f, app, chunks[0]);
     draw_charts(f, app, chunks[1]);
 }
 
-fn draw_text<B>(f: &mut Frame<B>, area: Rect)
+fn draw_text<B>(f: &mut Frame<B>, app: &App, area: Rect)
 where
     B: Backend,
 {
-    let text = [Text::raw("This is a paragraph")];
+    let text = [Text::raw(app.current_text.clone())];
     Paragraph::new(text.iter())
         .block(
             Block::default()
