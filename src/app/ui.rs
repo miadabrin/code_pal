@@ -43,7 +43,12 @@ fn draw_text<B>(f: &mut Frame<B>, app: &App, area: Rect)
 where
     B: Backend,
 {
-    let text = [Text::raw(app.current_text.clone())];
+    let text: Vec<Text> = app
+        .current_text
+        .iter()
+        .map(|x| Text::raw(x.clone()))
+        .rev()
+        .collect();
     let current_action_title = match app.current_action {
         CodePalAction::AddToDoItem => String::from("Add To Do Item"),
         _ => String::from(""),

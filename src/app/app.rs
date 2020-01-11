@@ -35,7 +35,7 @@ pub enum CodePalAction {
 }
 
 pub struct App<'a> {
-    pub current_text: String,
+    pub current_text: Vec<String>,
     pub current_action: CodePalAction,
     pub title: &'a str,
     pub should_quit: bool,
@@ -49,7 +49,7 @@ impl<'a> App<'a> {
     pub fn new(title: &'a str) -> App<'a> {
         App {
             title,
-            current_text: String::from(""),
+            current_text: vec![String::from("")],
             current_action: CodePalAction::None,
             should_quit: false,
             tabs: TabsState::new(vec!["Tab0", "Tab1"]),
@@ -103,7 +103,7 @@ impl<'a> App<'a> {
 
     pub fn on_stop_action(&mut self) {
         self.todo_add_activate = false;
-        self.current_text = String::from("");
+        self.current_text = vec![String::from("")];
         self.current_action = CodePalAction::None;
     }
 
@@ -114,7 +114,7 @@ impl<'a> App<'a> {
             }
             _ => {
                 if self.todo_add_activate {
-                    self.current_text.push(c);
+                    self.current_text[0].push(c);
                 }
                 //println!("Hello, world! {:#?}", c);
             }
