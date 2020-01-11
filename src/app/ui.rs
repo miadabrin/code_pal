@@ -6,7 +6,7 @@ use tui::style::{Color, Modifier, Style};
 use tui::widgets::{Block, Borders, Paragraph, Row, SelectableList, Table, Tabs, Text, Widget};
 use tui::{Frame, Terminal};
 
-use crate::app::App;
+use crate::app::{App, CodePalAction};
 
 pub fn draw<B: Backend>(terminal: &mut Terminal<B>, app: &App) -> Result<(), io::Error> {
     terminal.draw(|mut f| {
@@ -44,12 +44,16 @@ where
     B: Backend,
 {
     let text = [Text::raw(app.current_text.clone())];
+    let current_action_title = match app.current_action {
+        CodePalAction::AddToDoItem => String::from("Add To Do Item"),
+        _ => String::from(""),
+    };
     Paragraph::new(text.iter())
         .block(
             Block::default()
                 .borders(Borders::ALL)
-                .title("Footer")
-                .title_style(Style::default().fg(Color::Magenta).modifier(Modifier::BOLD)),
+                .title(&current_action_title)
+                .title_style(Style::default().modifier(Modifier::BOLD)),
         )
         .wrap(true)
         .render(f, area);

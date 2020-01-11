@@ -29,8 +29,14 @@ pub struct Server<'a> {
     pub status: &'a str,
 }
 
+pub enum CodePalAction {
+    AddToDoItem,
+    None,
+}
+
 pub struct App<'a> {
     pub current_text: String,
+    pub current_action: CodePalAction,
     pub title: &'a str,
     pub should_quit: bool,
     pub tabs: TabsState<'a>,
@@ -44,6 +50,7 @@ impl<'a> App<'a> {
         App {
             title,
             current_text: String::from(""),
+            current_action: CodePalAction::None,
             should_quit: false,
             tabs: TabsState::new(vec!["Tab0", "Tab1"]),
             tasks: ListState::new(vec![]),
@@ -90,11 +97,14 @@ impl<'a> App<'a> {
     }
 
     pub fn on_start_add_todo(&mut self) {
-        self.todo_add_activate = true
+        self.todo_add_activate = true;
+        self.current_action = CodePalAction::AddToDoItem;
     }
 
     pub fn on_stop_action(&mut self) {
-        self.todo_add_activate = false
+        self.todo_add_activate = false;
+        self.current_text = String::from("");
+        self.current_action = CodePalAction::None;
     }
 
     pub fn on_key(&mut self, c: char, m: KeyModifiers) {
