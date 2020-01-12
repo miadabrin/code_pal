@@ -89,7 +89,7 @@ fn main() -> Result<(), failure::Error> {
                     terminal.show_cursor()?;
                     break;
                 }
-                (KeyCode::Char('a'), KeyModifiers::CONTROL) => app.on_start_add_todo(),
+                (KeyCode::Char('a'), KeyModifiers::CONTROL) => app.on_add_todo(),
                 (KeyCode::Char(c), _) => app.on_key(c, event.modifiers),
                 (KeyCode::Left, _) => app.on_left(),
                 (KeyCode::Up, _) => app.on_up(),

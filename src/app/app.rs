@@ -77,7 +77,7 @@ impl<'a> App<'a> {
         self.tabs.previous();
     }
 
-    pub fn on_start_add_todo(&mut self) {
+    pub fn on_add_todo(&mut self) {
         self.current_action = CodePalAction::AddToDoItem;
     }
 
