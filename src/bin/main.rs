@@ -80,7 +80,7 @@ fn main() -> Result<(), failure::Error> {
     terminal.clear()?;
 
     loop {
-        ui::draw(&mut terminal, &app)?;
+        ui::draw(&mut terminal, &mut app)?;
         match rx.recv()? {
             Event::Input(event) => match (event.code, event.modifiers) {
                 (KeyCode::Char('q'), KeyModifiers::CONTROL) => {
@@ -89,16 +89,7 @@ fn main() -> Result<(), failure::Error> {
                     terminal.show_cursor()?;
                     break;
                 }
-                (KeyCode::Char('a'), KeyModifiers::CONTROL) => app.on_add_todo(),
-                (KeyCode::Char(c), _) => app.on_key(c, event.modifiers),
-                (KeyCode::Left, _) => app.on_left(),
-                (KeyCode::Up, _) => app.on_up(),
-                (KeyCode::Right, _) => app.on_right(),
-                (KeyCode::Down, _) => app.on_down(),
-                (KeyCode::Esc, _) => app.on_stop_action(),
-                (KeyCode::Backspace, _) => app.on_backspace(),
-                (KeyCode::Enter, _) => app.on_enter(),
-                (_, _) => {}
+                (_, _) => app.on_key(event),
             },
             Event::Tick => {
                 app.on_tick();

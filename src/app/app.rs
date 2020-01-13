@@ -1,5 +1,6 @@
+use crate::app::ui_component::{ListTextEditor, UIComponent};
 use crate::util::TabsState;
-use crossterm::event::KeyModifiers;
+use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use std::convert::TryFrom;
 
 pub struct ListState<I> {
@@ -31,11 +32,13 @@ pub struct Server<'a> {
 
 pub enum CodePalAction {
     AddToDoItem,
+    NoteEdit,
+    DescriptionEdit,
     None,
 }
 
 pub struct App<'a> {
-    pub current_text: Vec<String>,
+    pub todo_items: ListTextEditor,
     pub current_action: CodePalAction,
     pub title: &'a str,
     pub should_quit: bool,
@@ -48,10 +51,10 @@ impl<'a> App<'a> {
     pub fn new(title: &'a str) -> App<'a> {
         App {
             title,
-            current_text: vec![String::from("")],
+            todo_items: ListTextEditor::new(String::from("Todo Items"), vec![String::from("")]),
             current_action: CodePalAction::None,
             should_quit: false,
-            tabs: TabsState::new(vec!["Tab0", "Tab1"]),
+            tabs: TabsState::new(vec!["Notes", "Description"]),
             tasks: ListState::new(vec![]),
             servers: vec![Server {
                 name: "NorthAmerica-1",
@@ -82,45 +85,46 @@ impl<'a> App<'a> {
     }
 
     pub fn on_stop_action(&mut self) {
-        self.current_text = vec![String::from("")];
         self.current_action = CodePalAction::None;
     }
 
-    pub fn on_key(&mut self, c: char, m: KeyModifiers) {
-        match (c, m) {
-            ('q', KeyModifiers::CONTROL) => {
-                self.should_quit = true;
-            }
-            _ => {
-                if let CodePalAction::AddToDoItem = self.current_action {
-                    self.current_text
-                        .last_mut()
-                        .expect("Current Text has no item")
-                        .push(c);
-                }
-            }
-        }
+    pub fn current_active_item(&mut self) -> Option<&mut impl UIComponent> {
+        Some(&mut self.todo_items)
     }
 
-    pub fn on_backspace(&mut self) {
-        if let CodePalAction::AddToDoItem = self.current_action {
-            let last_item = self
-                .current_text
-                .last_mut()
-                .expect("Current Text has no item");
-            if last_item.len() > 0 {
-                last_item.pop();
-            } else {
-                if self.current_text.len() > 1 {
-                    self.current_text.pop();
+    pub fn on_key(&mut self, event: KeyEvent) {
+        match (event.code, event.modifiers) {
+            (KeyCode::Char('q'), KeyModifiers::CONTROL) => {
+                self.should_quit = true;
+            }
+            (KeyCode::Char('a'), KeyModifiers::CONTROL) => self.on_add_todo(),
+            (KeyCode::Esc, _) => self.on_stop_action(),
+            _ => {
+                if let Some(x) = self.current_active_item() {
+                    x.on_event(event);
+                } else {
+                    match (event.code, event.modifiers) {
+                        (KeyCode::Left, _) => self.on_left(),
+                        (KeyCode::Up, _) => self.on_up(),
+                        (KeyCode::Right, _) => self.on_right(),
+                        (KeyCode::Down, _) => self.on_down(),
+                        (KeyCode::Enter, _) => self.on_enter(),
+                        (_, _) => {}
+                    }
                 }
             }
         }
     }
 
     pub fn on_enter(&mut self) {
-        if let CodePalAction::AddToDoItem = self.current_action {
-            self.current_text.push(String::from(""));
+        match self.tabs.index {
+            0 => {
+                self.current_action = CodePalAction::NoteEdit;
+            }
+            1 => {
+                self.current_action = CodePalAction::DescriptionEdit;
+            }
+            _ => {}
         }
     }
 
