@@ -106,12 +106,16 @@ impl UIComponent for ListTextEditor {
 	where
 		B: Backend,
 	{
+		let selection_symbol = match self.active {
+			true => ">",
+			false => "*",
+		};
 		SelectableList::default()
 			.block(Block::default().borders(Borders::ALL).title("Todo List"))
 			.items(&self.current_text)
 			.select(self.current_selection)
 			.highlight_style(Style::default().fg(Color::Yellow).modifier(Modifier::BOLD))
-			.highlight_symbol(">")
+			.highlight_symbol(selection_symbol)
 			.render(f, area);
 	}
 }
