@@ -89,7 +89,10 @@ impl<'a> App<'a> {
     }
 
     pub fn current_active_item(&mut self) -> Option<&mut impl UIComponent> {
-        Some(&mut self.todo_items)
+        match self.current_action {
+            CodePalAction::AddToDoItem => Some(&mut self.todo_items),
+            _ => None,
+        }
     }
 
     pub fn on_key(&mut self, event: KeyEvent) {
