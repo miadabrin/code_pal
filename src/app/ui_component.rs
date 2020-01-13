@@ -62,8 +62,8 @@ impl ListTextEditor {
 					if elem.len() > 0 {
 						elem.pop();
 					} else {
-						self.current_text.remove(x);
 						if x >= 1 {
+							self.current_text.remove(x);
 							self.current_selection = Some(x - 1);
 						}
 					}
