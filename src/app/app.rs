@@ -54,7 +54,7 @@ impl<'a> App<'a> {
             todo_items: ListTextEditor::new(String::from("Todo Items"), vec![String::from("")]),
             current_action: CodePalAction::None,
             should_quit: false,
-            tabs: TabsState::new(vec!["Notes", "Description"]),
+            tabs: TabsState::new(vec!["Notes"]),
             tasks: ListState::new(vec![]),
             servers: vec![Server {
                 name: "NorthAmerica-1",

@@ -29,10 +29,12 @@ impl ListTextEditor {
 	}
 
 	pub fn on_key(&mut self, c: char, _: KeyModifiers) {
-		if let Some(selected_index) = self.current_selection {
-			if let Some(elem) = self.current_text.get_mut(selected_index) {
-				elem.push(c);
-			}
+		let selected_index = match self.current_selection {
+			Some(selected_index) => selected_index,
+			None => 0,
+		};
+		if let Some(elem) = self.current_text.get_mut(selected_index) {
+			elem.push(c);
 		}
 	}
 
