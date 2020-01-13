@@ -18,6 +18,7 @@ pub struct ListTextEditor {
 	pub title: String,
 	pub current_text: Vec<String>,
 	pub current_selection: Option<usize>,
+	pub active: bool,
 }
 
 impl ListTextEditor {
@@ -26,6 +27,7 @@ impl ListTextEditor {
 			title: title,
 			current_text: initial_text,
 			current_selection: Option::None,
+			active: false,
 		}
 	}
 
@@ -82,11 +84,13 @@ impl ListTextEditor {
 
 impl UIComponent for ListTextEditor {
 	fn on_deactivate(&mut self) {
-		self.current_text = vec![String::from("")];
-		self.current_selection = Option::None;
+		self.active = false
 	}
 	fn on_activate(&mut self) {
-		self.current_selection = Some(0);
+		if let None = self.current_selection {
+			self.current_selection = Some(0);
+		}
+		self.active = true;
 	}
 	fn on_event(&mut self, event: KeyEvent) {
 		match (event.code, event.modifiers) {
