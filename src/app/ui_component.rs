@@ -6,8 +6,9 @@ use tui::widgets::{Block, Borders, SelectableList, Widget};
 use tui::Frame;
 
 pub trait UIComponent {
-	fn on_deactivate(&mut self);
-	fn on_event(&mut self, event: KeyEvent);
+	fn on_deactivate(&mut self) {}
+	fn on_activate(&mut self) {}
+	fn on_event(&mut self, _: KeyEvent) {}
 	fn draw<B>(&mut self, f: &mut Frame<B>, area: Rect)
 	where
 		B: Backend;
@@ -69,7 +70,10 @@ impl ListTextEditor {
 		}
 	}
 	pub fn on_enter(&mut self) {
-		self.current_text.push(String::from(""));
+		if let Some(x) = self.current_selection {
+			self.current_text.insert(x + 1, String::from(""));
+			self.current_selection = Some(x + 1);
+		}
 	}
 }
 
@@ -77,6 +81,9 @@ impl UIComponent for ListTextEditor {
 	fn on_deactivate(&mut self) {
 		self.current_text = vec![String::from("")];
 		self.current_selection = Option::None;
+	}
+	fn on_activate(&mut self) {
+		self.current_selection = Some(0);
 	}
 	fn on_event(&mut self, event: KeyEvent) {
 		match (event.code, event.modifiers) {

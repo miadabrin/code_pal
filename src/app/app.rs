@@ -82,10 +82,14 @@ impl<'a> App<'a> {
 
     pub fn on_add_todo(&mut self) {
         self.current_action = CodePalAction::AddToDoItem;
+        self.todo_items.on_activate();
     }
 
     pub fn on_stop_action(&mut self) {
-        self.current_action = CodePalAction::None;
+        if let Some(x) = self.current_active_item() {
+            x.on_deactivate();
+            self.current_action = CodePalAction::None;
+        }
     }
 
     pub fn current_active_item(&mut self) -> Option<&mut impl UIComponent> {
