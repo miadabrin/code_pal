@@ -1,4 +1,4 @@
-use crate::app::ui_component::{ListTextEditor, UIComponent};
+use crate::app::ui_component::{ListTextEditor, UIEventProcessor};
 use crate::util::TabsState;
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use std::convert::TryFrom;
@@ -92,7 +92,7 @@ impl<'a> App<'a> {
         }
     }
 
-    pub fn current_active_item(&mut self) -> Option<&mut impl UIComponent> {
+    pub fn current_active_item(&mut self) -> Option<&mut dyn UIEventProcessor> {
         match self.current_action {
             CodePalAction::AddToDoItem => Some(&mut self.todo_items),
             _ => None,

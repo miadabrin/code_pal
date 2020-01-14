@@ -5,10 +5,13 @@ use tui::style::{Color, Modifier, Style};
 use tui::widgets::{Block, Borders, SelectableList, Widget};
 use tui::Frame;
 
-pub trait UIComponent {
+pub trait UIEventProcessor {
 	fn on_deactivate(&mut self) {}
 	fn on_activate(&mut self) {}
 	fn on_event(&mut self, _: KeyEvent) {}
+}
+
+pub trait UIComponent {
 	fn draw<B>(&mut self, f: &mut Frame<B>, area: Rect)
 	where
 		B: Backend;
@@ -82,7 +85,7 @@ impl ListTextEditor {
 	}
 }
 
-impl UIComponent for ListTextEditor {
+impl UIEventProcessor for ListTextEditor {
 	fn on_deactivate(&mut self) {
 		self.active = false
 	}
@@ -102,6 +105,8 @@ impl UIComponent for ListTextEditor {
 			(_, _) => {}
 		}
 	}
+}
+impl UIComponent for ListTextEditor {
 	fn draw<B>(&mut self, f: &mut Frame<B>, area: Rect)
 	where
 		B: Backend,
