@@ -1,28 +1,6 @@
 use crate::app::ui_component::{ListTextEditor, UIEventProcessor};
 use crate::util::TabsState;
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
-use std::convert::TryFrom;
-
-pub struct ListState<I> {
-    pub items: Vec<I>,
-    pub selected: usize,
-}
-
-impl<I> ListState<I> {
-    fn new(items: Vec<I>) -> ListState<I> {
-        ListState { items, selected: 0 }
-    }
-    fn select_previous(&mut self) {
-        if self.selected > 0 {
-            self.selected -= 1;
-        }
-    }
-    fn select_next(&mut self) {
-        if i64::try_from(self.selected).unwrap() < i64::try_from(self.items.len()).unwrap() - 1 {
-            self.selected += 1
-        }
-    }
-}
 
 pub struct Server<'a> {
     pub name: &'a str,
@@ -43,7 +21,6 @@ pub struct App<'a> {
     pub title: &'a str,
     pub should_quit: bool,
     pub tabs: TabsState<'a>,
-    pub tasks: ListState<String>,
     pub servers: Vec<Server<'a>>,
 }
 
@@ -55,7 +32,6 @@ impl<'a> App<'a> {
             current_action: CodePalAction::None,
             should_quit: false,
             tabs: TabsState::new(vec!["Notes"]),
-            tasks: ListState::new(vec![]),
             servers: vec![Server {
                 name: "NorthAmerica-1",
                 location: "New York City",
@@ -64,13 +40,9 @@ impl<'a> App<'a> {
         }
     }
 
-    pub fn on_up(&mut self) {
-        self.tasks.select_previous();
-    }
+    pub fn on_up(&mut self) {}
 
-    pub fn on_down(&mut self) {
-        self.tasks.select_next();
-    }
+    pub fn on_down(&mut self) {}
 
     pub fn on_right(&mut self) {
         self.tabs.next();
