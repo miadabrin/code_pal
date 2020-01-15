@@ -13,3 +13,4 @@ structopt = "0.3.7"
 rand = "0.7.2"
 stderrlog = "0.4.3"
 failure = "0.1"
+uuid = { version = "0.8", features = ["serde", "v4"] }

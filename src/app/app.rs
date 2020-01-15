@@ -1,4 +1,5 @@
 use crate::app::ui_component::{ListTextEditor, UIEventProcessor};
+use crate::todo::todo::{EditableStateItem, TodoItem};
 use crate::util::TabsState;
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
@@ -16,7 +17,7 @@ pub enum CodePalAction {
 }
 
 pub struct App<'a> {
-    pub todo_items: ListTextEditor,
+    pub todo_items: ListTextEditor<TodoItem>,
     pub current_action: CodePalAction,
     pub title: &'a str,
     pub should_quit: bool,
@@ -27,7 +28,10 @@ impl<'a> App<'a> {
     pub fn new(title: &'a str) -> App<'a> {
         App {
             title,
-            todo_items: ListTextEditor::new(String::from("Todo Items"), vec![String::from("")]),
+            todo_items: ListTextEditor::new(
+                String::from("Todo Items"),
+                vec![TodoItem::new(String::from(""))],
+            ),
             current_action: CodePalAction::None,
             should_quit: false,
             tabs: TabsState::new(vec!["Notes"]),
