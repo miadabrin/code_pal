@@ -21,7 +21,6 @@ pub struct App<'a> {
     pub title: &'a str,
     pub should_quit: bool,
     pub tabs: TabsState<'a>,
-    pub servers: Vec<Server<'a>>,
 }
 
 impl<'a> App<'a> {
@@ -32,11 +31,6 @@ impl<'a> App<'a> {
             current_action: CodePalAction::None,
             should_quit: false,
             tabs: TabsState::new(vec!["Notes"]),
-            servers: vec![Server {
-                name: "NorthAmerica-1",
-                location: "New York City",
-                status: "Up",
-            }],
         }
     }
 
