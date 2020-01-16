@@ -136,7 +136,7 @@ where
 		let items: Vec<_> = self
 			.current_text
 			.iter_mut()
-			.map(|x| &*(x.get_content_mut()))
+			.map(|x| (x.get_content_mut()))
 			.collect();
 
 		SelectableList::default()
