@@ -6,12 +6,6 @@ use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-pub struct Server<'a> {
-    pub name: &'a str,
-    pub location: &'a str,
-    pub status: &'a str,
-}
-
 pub enum CodePalAction {
     AddToDoItem,
     NoteEdit,

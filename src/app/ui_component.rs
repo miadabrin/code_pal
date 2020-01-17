@@ -75,13 +75,14 @@ where
 	pub fn on_backspace(&mut self) {
 		match self.current_selection {
 			Some(x) => {
-				if let Some(elem) = (*self.current_text).borrow_mut().get_mut(x) {
+				let mut borrowed_item = (*self.current_text).borrow_mut();
+				if let Some(elem) = borrowed_item.get_mut(x) {
 					let content = elem.get_content_mut();
 					if content.len() > 0 {
 						content.pop();
 					} else {
 						if x >= 1 {
-							(*self.current_text).borrow_mut().remove(x);
+							borrowed_item.remove(x);
 							self.current_selection = Some(x - 1);
 						}
 					}
