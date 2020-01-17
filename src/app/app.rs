@@ -1,7 +1,10 @@
 use crate::app::ui_component::{ListTextEditor, UIEventProcessor};
-use crate::todo::todo::{EditableStateItem, TodoItem};
+use crate::todo::todo::EditableStateItem;
+use crate::todo::todo::TodoItem;
 use crate::util::TabsState;
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 pub struct Server<'a> {
     pub name: &'a str,
@@ -16,6 +19,18 @@ pub enum CodePalAction {
     None,
 }
 
+pub struct AppState {
+    pub todo_items: Rc<RefCell<Vec<TodoItem>>>,
+}
+
+impl AppState {
+    pub fn new() -> AppState {
+        AppState {
+            todo_items: Rc::new(RefCell::new(vec![TodoItem::new(String::from(""))])),
+        }
+    }
+}
+
 pub struct App<'a> {
     pub todo_items: ListTextEditor<TodoItem>,
     pub current_action: CodePalAction,
@@ -25,12 +40,12 @@ pub struct App<'a> {
 }
 
 impl<'a> App<'a> {
-    pub fn new(title: &'a str) -> App<'a> {
+    pub fn new(title: &'a str, appstate: AppState) -> App<'a> {
         App {
             title,
             todo_items: ListTextEditor::new(
                 String::from("Todo Items"),
-                vec![TodoItem::new(String::from(""))],
+                appstate.todo_items.clone(),
             ),
             current_action: CodePalAction::None,
             should_quit: false,

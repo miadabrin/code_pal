@@ -16,7 +16,7 @@ use crossterm::{
 use structopt::StructOpt;
 use tui::{backend::CrosstermBackend, Terminal};
 
-use crate::app::{ui, App};
+use crate::app::{ui, App, AppState};
 use crossterm::terminal::LeaveAlternateScreen;
 
 enum Event<I> {
@@ -62,7 +62,8 @@ fn main() -> Result<(), failure::Error> {
         }
     });
 
-    let mut app = App::new("Code Pal");
+    let app_state = AppState::new();
+    let mut app = App::new("Code Pal", app_state);
 
     terminal.clear()?;
 
