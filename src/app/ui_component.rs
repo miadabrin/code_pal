@@ -119,14 +119,16 @@ where
 		self.active = true;
 	}
 	fn on_event(&mut self, event: KeyEvent) {
-		if self.active {
-			match (event.code, event.modifiers) {
-				(KeyCode::Char(c), _) => self.on_key(c, event.modifiers),
-				(KeyCode::Up, _) => self.on_up(),
-				(KeyCode::Down, _) => self.on_down(),
-				(KeyCode::Backspace, _) => self.on_backspace(),
-				(KeyCode::Enter, _) => self.on_enter(),
-				(_, _) => {}
+		if let Some(_) = self.current_text {
+			if self.active {
+				match (event.code, event.modifiers) {
+					(KeyCode::Char(c), _) => self.on_key(c, event.modifiers),
+					(KeyCode::Up, _) => self.on_up(),
+					(KeyCode::Down, _) => self.on_down(),
+					(KeyCode::Backspace, _) => self.on_backspace(),
+					(KeyCode::Enter, _) => self.on_enter(),
+					(_, _) => {}
+				}
 			}
 		}
 	}
@@ -143,20 +145,22 @@ where
 			true => ">",
 			false => "*",
 		};
-		let item_ref = (*self.current_text.as_ref().unwrap()).clone();
-		let mut borrowed_item = item_ref.borrow_mut();
+		if let Some(x) = self.current_text.as_ref() {
+			let item_ref = (*x).clone();
+			let mut borrowed_item = item_ref.borrow_mut();
 
-		let items: Vec<_> = borrowed_item
-			.iter_mut()
-			.map(|x| (x.get_content_mut()))
-			.collect();
+			let items: Vec<_> = borrowed_item
+				.iter_mut()
+				.map(|x| (x.get_content_mut()))
+				.collect();
 
-		SelectableList::default()
-			.block(Block::default().borders(Borders::ALL).title("Todo List"))
-			.items(&items)
-			.select(self.current_selection)
-			.highlight_style(Style::default().fg(Color::Yellow).modifier(Modifier::BOLD))
-			.highlight_symbol(selection_symbol)
-			.render(f, area);
+			SelectableList::default()
+				.block(Block::default().borders(Borders::ALL).title("Todo List"))
+				.items(&items)
+				.select(self.current_selection)
+				.highlight_style(Style::default().fg(Color::Yellow).modifier(Modifier::BOLD))
+				.highlight_symbol(selection_symbol)
+				.render(f, area);
+		}
 	}
 }
