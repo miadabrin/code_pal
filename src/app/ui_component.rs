@@ -26,7 +26,7 @@ where
 	T: EditableStateItem,
 {
 	pub title: String,
-	pub current_text: Rc<RefCell<Vec<T>>>,
+	pub current_text: Option<Rc<RefCell<Vec<T>>>>,
 	pub current_selection: Option<usize>,
 	pub active: bool,
 }
@@ -35,7 +35,7 @@ impl<T> ListTextEditor<T>
 where
 	T: EditableStateItem,
 {
-	pub fn new(title: String, initial_text: Rc<RefCell<Vec<T>>>) -> ListTextEditor<T> {
+	pub fn new(title: String, initial_text: Option<Rc<RefCell<Vec<T>>>>) -> ListTextEditor<T> {
 		ListTextEditor {
 			title: title,
 			current_text: initial_text,
@@ -49,10 +49,11 @@ where
 			Some(selected_index) => selected_index,
 			None => 0,
 		};
-		if let Some(elem) = (*self.current_text).borrow_mut().get_mut(selected_index) {
+		let item_ref = (*self.current_text.as_ref().unwrap()).clone();
+		if let Some(elem) = item_ref.borrow_mut().get_mut(selected_index) {
 			let content = elem.get_content_mut();
 			content.push(c);
-		}
+		};
 	}
 
 	pub fn on_up(&mut self) {
@@ -62,20 +63,23 @@ where
 		}
 	}
 	pub fn on_down(&mut self) {
+		let item_ref = (*self.current_text.as_ref().unwrap()).clone();
+		let mut borrowed_item = item_ref.borrow_mut();
 		self.current_selection = match self.current_selection {
-			Some(x) if x < (*self.current_text).borrow_mut().len() - 1 => Some(x + 1),
-			Some(x) if x == (*self.current_text).borrow_mut().len() - 1 => {
+			Some(x) if x < borrowed_item.len() - 1 => Some(x + 1),
+			Some(x) if x == borrowed_item.len() - 1 => {
 				let t = T::new(String::from(""));
-				(*self.current_text).borrow_mut().push(t);
-				Some((*self.current_text).borrow_mut().len() - 1)
+				borrowed_item.push(t);
+				Some(borrowed_item.len() - 1)
 			}
-			_ => Some((*self.current_text).borrow_mut().len()),
+			_ => Some(borrowed_item.len()),
 		}
 	}
 	pub fn on_backspace(&mut self) {
+		let item_ref = (*self.current_text.as_ref().unwrap()).clone();
 		match self.current_selection {
 			Some(x) => {
-				let mut borrowed_item = (*self.current_text).borrow_mut();
+				let mut borrowed_item = item_ref.borrow_mut();
 				if let Some(elem) = borrowed_item.get_mut(x) {
 					let content = elem.get_content_mut();
 					if content.len() > 0 {
@@ -94,7 +98,8 @@ where
 	pub fn on_enter(&mut self) {
 		if let Some(x) = self.current_selection {
 			let t = T::new(String::from(""));
-			(*self.current_text).borrow_mut().insert(x + 1, t);
+			let item_ref = (*self.current_text.as_ref().unwrap()).clone();
+			item_ref.borrow_mut().insert(x + 1, t);
 			self.current_selection = Some(x + 1);
 		}
 	}
@@ -114,13 +119,15 @@ where
 		self.active = true;
 	}
 	fn on_event(&mut self, event: KeyEvent) {
-		match (event.code, event.modifiers) {
-			(KeyCode::Char(c), _) => self.on_key(c, event.modifiers),
-			(KeyCode::Up, _) => self.on_up(),
-			(KeyCode::Down, _) => self.on_down(),
-			(KeyCode::Backspace, _) => self.on_backspace(),
-			(KeyCode::Enter, _) => self.on_enter(),
-			(_, _) => {}
+		if self.active {
+			match (event.code, event.modifiers) {
+				(KeyCode::Char(c), _) => self.on_key(c, event.modifiers),
+				(KeyCode::Up, _) => self.on_up(),
+				(KeyCode::Down, _) => self.on_down(),
+				(KeyCode::Backspace, _) => self.on_backspace(),
+				(KeyCode::Enter, _) => self.on_enter(),
+				(_, _) => {}
+			}
 		}
 	}
 }
@@ -136,8 +143,8 @@ where
 			true => ">",
 			false => "*",
 		};
-
-		let mut borrowed_item = (*self.current_text).borrow_mut();
+		let item_ref = (*self.current_text.as_ref().unwrap()).clone();
+		let mut borrowed_item = item_ref.borrow_mut();
 
 		let items: Vec<_> = borrowed_item
 			.iter_mut()

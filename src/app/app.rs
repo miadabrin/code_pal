@@ -39,7 +39,7 @@ impl<'a> App<'a> {
             title,
             todo_items: ListTextEditor::new(
                 String::from("Todo Items"),
-                appstate.todo_items.clone(),
+                Some(appstate.todo_items.clone()),
             ),
             current_action: CodePalAction::None,
             should_quit: false,
