@@ -16,13 +16,8 @@ use crossterm::{
 use structopt::StructOpt;
 use tui::{backend::CrosstermBackend, Terminal};
 
-use crate::app::{ui, App, AppState};
+use crate::app::{ui, App, AppState, Event};
 use crossterm::terminal::LeaveAlternateScreen;
-
-enum Event<I> {
-    Input(I),
-    Tick,
-}
 
 #[derive(Debug, StructOpt)]
 struct Cli {
@@ -49,21 +44,24 @@ fn main() -> Result<(), failure::Error> {
     // Setup input handling
     let (tx, rx) = mpsc::channel();
 
+    let tx1 = mpsc::Sender::clone(&tx);
+    let tx2 = mpsc::Sender::clone(&tx);
+
     thread::spawn(move || {
         loop {
             // poll for tick rate duration, if no events, sent tick event.
             if let Ok(_) = event::poll(Duration::from_millis(cli.tick_rate)) {
                 if let Ok(CEvent::Key(key)) = event::read() {
-                    tx.send(Event::Input(key)).unwrap_or_default();
+                    tx1.send(Event::Input(key)).unwrap_or_default();
                 }
             }
 
-            tx.send(Event::Tick).unwrap_or_default();
+            tx1.send(Event::Tick).unwrap_or_default();
         }
     });
 
     let app_state = AppState::new();
-    let mut app = App::new("Code Pal", app_state);
+    let mut app = App::new("Code Pal", app_state, tx2);
 
     terminal.clear()?;
 
@@ -81,6 +79,10 @@ fn main() -> Result<(), failure::Error> {
             },
             Event::Tick => {
                 app.on_tick();
+            }
+
+            Event::Action(action) => {
+                app.on_action(action);
             }
         }
         if app.should_quit {

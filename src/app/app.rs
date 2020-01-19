@@ -1,10 +1,13 @@
 use crate::app::ui_component::{ListTextEditor, UIEventProcessor};
+use crate::app::{ActionPayload, Event};
 use crate::todo::todo::EditableStateItem;
-use crate::todo::todo::TodoItem;
+use crate::todo::todo::{Note, TodoItem};
 use crate::util::TabsState;
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use std::cell::RefCell;
 use std::rc::Rc;
+
+use std::sync::mpsc::Sender;
 
 pub enum CodePalAction {
     AddToDoItem,
@@ -28,6 +31,7 @@ impl AppState {
 pub struct App<'a> {
     pub app_state: AppState,
     pub todo_items: ListTextEditor<TodoItem>,
+    pub notes: ListTextEditor<Note>,
     pub current_action: CodePalAction,
     pub title: &'a str,
     pub should_quit: bool,
@@ -35,13 +39,19 @@ pub struct App<'a> {
 }
 
 impl<'a> App<'a> {
-    pub fn new(title: &'a str, app_state: AppState) -> App<'a> {
+    pub fn new(title: &'a str, app_state: AppState, sender: Sender<Event>) -> App<'a> {
         let mut a = App {
             app_state,
             title,
             todo_items: ListTextEditor::new(
                 String::from("Todo Items"),
                 None::<Rc<RefCell<Vec<TodoItem>>>>,
+                Sender::clone(&sender),
+            ),
+            notes: ListTextEditor::new(
+                String::from("Notes"),
+                None::<Rc<RefCell<Vec<Note>>>>,
+                Sender::clone(&sender),
             ),
             current_action: CodePalAction::None,
             should_quit: false,
@@ -124,5 +134,25 @@ impl<'a> App<'a> {
 
     pub fn on_tick(&mut self) {
         // Update self values
+    }
+
+    pub fn on_action(&mut self, action: ActionPayload) {
+        match action {
+            ActionPayload::Selection(sender, selected_index) => {
+                if sender == "Todo Items" {
+                    let item_ref = self.app_state.todo_items.clone();
+                    match selected_index {
+                        Some(index) => {
+                            let mut borrowed = item_ref.borrow_mut();
+                            let todo = borrowed.get_mut(index).unwrap();
+                            self.notes.current_text = Some(todo.notes.clone());
+                        }
+                        None => {
+                            self.notes.current_text = None;
+                        }
+                    };
+                }
+            }
+        }
     }
 }

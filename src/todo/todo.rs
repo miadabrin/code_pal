@@ -1,3 +1,5 @@
+use std::cell::RefCell;
+use std::rc::Rc;
 use uuid::Uuid;
 
 pub trait EditableStateItem {
@@ -12,7 +14,7 @@ pub struct TodoItem {
 	pub identifier: String,
 	pub title: String,
 	pub description: Vec<String>,
-	pub notes: Vec<String>,
+	pub notes: Rc<RefCell<Vec<Note>>>,
 }
 
 impl EditableStateItem for TodoItem {
@@ -30,7 +32,7 @@ impl EditableStateItem for TodoItem {
 			identifier: Uuid::new_v4().to_string(),
 			title: s,
 			description: vec![],
-			notes: vec![],
+			notes: Rc::new(RefCell::new(vec![])),
 		}
 	}
 }

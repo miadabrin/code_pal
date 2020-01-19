@@ -1,6 +1,8 @@
+use crate::app::{ActionPayload, Event};
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::mpsc::Sender;
 use tui::backend::Backend;
 use tui::layout::Rect;
 use tui::style::{Color, Modifier, Style};
@@ -29,18 +31,24 @@ where
 	pub current_text: Option<Rc<RefCell<Vec<T>>>>,
 	pub current_selection: Option<usize>,
 	pub active: bool,
+	pub sender: Sender<Event>,
 }
 
 impl<T> ListTextEditor<T>
 where
 	T: EditableStateItem,
 {
-	pub fn new(title: String, initial_text: Option<Rc<RefCell<Vec<T>>>>) -> ListTextEditor<T> {
+	pub fn new(
+		title: String,
+		initial_text: Option<Rc<RefCell<Vec<T>>>>,
+		sender: Sender<Event>,
+	) -> ListTextEditor<T> {
 		ListTextEditor {
-			title: title,
+			title,
 			current_text: initial_text,
 			current_selection: Option::None,
 			active: false,
+			sender,
 		}
 	}
 
@@ -57,23 +65,23 @@ where
 	}
 
 	pub fn on_up(&mut self) {
-		self.current_selection = match self.current_selection {
-			Some(x) if x > 0 => Some(x - 1),
-			_ => Some(0),
-		}
+		self.select_item(match self.current_selection {
+			Some(x) if x > 0 => x - 1,
+			_ => 0,
+		});
 	}
 	pub fn on_down(&mut self) {
 		let item_ref = (*self.current_text.as_ref().unwrap()).clone();
 		let mut borrowed_item = item_ref.borrow_mut();
-		self.current_selection = match self.current_selection {
-			Some(x) if x < borrowed_item.len() - 1 => Some(x + 1),
+		self.select_item(match self.current_selection {
+			Some(x) if x < borrowed_item.len() - 1 => x + 1,
 			Some(x) if x == borrowed_item.len() - 1 => {
 				let t = T::new(String::from(""));
 				borrowed_item.push(t);
-				Some(borrowed_item.len() - 1)
+				borrowed_item.len() - 1
 			}
-			_ => Some(borrowed_item.len()),
-		}
+			_ => borrowed_item.len(),
+		});
 	}
 	pub fn on_backspace(&mut self) {
 		let item_ref = (*self.current_text.as_ref().unwrap()).clone();
@@ -100,8 +108,27 @@ where
 			let t = T::new(String::from(""));
 			let item_ref = (*self.current_text.as_ref().unwrap()).clone();
 			item_ref.borrow_mut().insert(x + 1, t);
-			self.current_selection = Some(x + 1);
+			self.select_item(x + 1);
 		}
+	}
+
+	pub fn select_item(&mut self, index: usize) {
+		self.current_selection = Some(index);
+		self.broadcast_selection();
+	}
+
+	pub fn broadcast_selection(&mut self) {
+		self.sender
+			.send(Event::Action(ActionPayload::Selection(
+				self.title.clone(),
+				self.current_selection,
+			)))
+			.unwrap_or_default();
+	}
+
+	pub fn unselect(&mut self) {
+		self.current_selection = None;
+		self.broadcast_selection();
 	}
 }
 
@@ -114,7 +141,7 @@ where
 	}
 	fn on_activate(&mut self) {
 		if let None = self.current_selection {
-			self.current_selection = Some(0);
+			self.select_item(0);
 		}
 		self.active = true;
 	}
