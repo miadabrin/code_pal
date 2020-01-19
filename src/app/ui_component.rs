@@ -182,7 +182,7 @@ where
 				.collect();
 
 			SelectableList::default()
-				.block(Block::default().borders(Borders::ALL).title("Todo List"))
+				.block(Block::default().borders(Borders::ALL).title(&self.title))
 				.items(&items)
 				.select(self.current_selection)
 				.highlight_style(Style::default().fg(Color::Yellow).modifier(Modifier::BOLD))

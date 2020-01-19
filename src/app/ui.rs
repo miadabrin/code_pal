@@ -32,7 +32,8 @@ where
     B: Backend,
 {
     let chunks = Layout::default()
-        .constraints([Constraint::Length(7) /*, Constraint::Min(7)*/].as_ref())
+        .constraints([Constraint::Length(7), Constraint::Min(7)].as_ref())
         .split(area);
     app.todo_items.draw(f, chunks[0]);
+    app.notes.draw(f, chunks[1]);
 }
