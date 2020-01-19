@@ -155,6 +155,7 @@ impl<'a> App<'a> {
                 let mut borrowed = item_ref.borrow_mut();
                 let todo = borrowed.get_mut(index).unwrap();
                 self.notes.current_text = Some(todo.notes.clone());
+                self.notes.select_item(0);
             }
             None => {
                 self.notes.current_text = None;
