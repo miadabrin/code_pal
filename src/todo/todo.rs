@@ -32,7 +32,7 @@ impl EditableStateItem for TodoItem {
 			identifier: Uuid::new_v4().to_string(),
 			title: s,
 			description: vec![],
-			notes: Rc::new(RefCell::new(vec![])),
+			notes: Rc::new(RefCell::new(vec![Note::new(String::from(""))])),
 		}
 	}
 }

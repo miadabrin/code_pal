@@ -9,9 +9,10 @@ use std::rc::Rc;
 
 use std::sync::mpsc::Sender;
 
+#[derive(Debug)]
 pub enum CodePalAction {
     AddToDoItem,
-    NoteEdit,
+    AddNote,
     DescriptionEdit,
     None,
 }
@@ -63,6 +64,7 @@ impl<'a> App<'a> {
 
     pub fn init_state(&mut self) {
         self.todo_items.current_text = Some(self.app_state.todo_items.clone());
+        self.set_notes();
     }
 
     pub fn on_up(&mut self) {}
@@ -82,6 +84,11 @@ impl<'a> App<'a> {
         self.todo_items.on_activate();
     }
 
+    pub fn on_add_note(&mut self) {
+        self.current_action = CodePalAction::AddNote;
+        self.notes.on_activate();
+    }
+
     pub fn on_stop_action(&mut self) {
         if let Some(x) = self.current_active_item() {
             x.on_deactivate();
@@ -92,6 +99,7 @@ impl<'a> App<'a> {
     pub fn current_active_item(&mut self) -> Option<&mut dyn UIEventProcessor> {
         match self.current_action {
             CodePalAction::AddToDoItem => Some(&mut self.todo_items),
+            CodePalAction::AddNote => Some(&mut self.notes),
             _ => None,
         }
     }
@@ -102,6 +110,7 @@ impl<'a> App<'a> {
                 self.should_quit = true;
             }
             (KeyCode::Char('a'), KeyModifiers::CONTROL) => self.on_add_todo(),
+            (KeyCode::Char('n'), KeyModifiers::CONTROL) => self.on_add_note(),
             (KeyCode::Esc, _) => self.on_stop_action(),
             _ => {
                 if let Some(x) = self.current_active_item() {
@@ -121,6 +130,7 @@ impl<'a> App<'a> {
     }
 
     pub fn on_enter(&mut self) {
+        /*
         match self.tabs.index {
             0 => {
                 self.current_action = CodePalAction::NoteEdit;
@@ -130,27 +140,33 @@ impl<'a> App<'a> {
             }
             _ => {}
         }
+        */
     }
 
     pub fn on_tick(&mut self) {
         // Update self values
     }
 
+    pub fn set_notes(&mut self) {
+        let item_ref = self.app_state.todo_items.clone();
+        let selected_index = self.todo_items.current_selection;
+        match selected_index {
+            Some(index) => {
+                let mut borrowed = item_ref.borrow_mut();
+                let todo = borrowed.get_mut(index).unwrap();
+                self.notes.current_text = Some(todo.notes.clone());
+            }
+            None => {
+                self.notes.current_text = None;
+            }
+        };
+    }
+
     pub fn on_action(&mut self, action: ActionPayload) {
         match action {
-            ActionPayload::Selection(sender, selected_index) => {
+            ActionPayload::Selection(sender, _) => {
                 if sender == "Todo Items" {
-                    let item_ref = self.app_state.todo_items.clone();
-                    match selected_index {
-                        Some(index) => {
-                            let mut borrowed = item_ref.borrow_mut();
-                            let todo = borrowed.get_mut(index).unwrap();
-                            self.notes.current_text = Some(todo.notes.clone());
-                        }
-                        None => {
-                            self.notes.current_text = None;
-                        }
-                    };
+                    self.set_notes();
                 }
             }
         }
