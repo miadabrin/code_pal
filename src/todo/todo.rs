@@ -1,18 +1,18 @@
 use uuid::Uuid;
 
+pub trait EditableStateItem {
+	fn get_content_mut(&mut self) -> &mut String;
+	fn get_identifier_mut(&mut self) -> &mut String;
+	fn get_content_ref(&mut self) -> &str;
+	fn new(s: String) -> Self;
+}
+
 #[derive(Debug)]
 pub struct TodoItem {
 	pub identifier: String,
 	pub title: String,
 	pub description: Vec<String>,
 	pub notes: Vec<String>,
-}
-
-pub trait EditableStateItem {
-	fn get_content_mut(&mut self) -> &mut String;
-	fn get_identifier_mut(&mut self) -> &mut String;
-	fn get_content_ref(&mut self) -> &str;
-	fn new(s: String) -> Self;
 }
 
 impl EditableStateItem for TodoItem {
@@ -31,6 +31,30 @@ impl EditableStateItem for TodoItem {
 			title: s,
 			description: vec![],
 			notes: vec![],
+		}
+	}
+}
+
+#[derive(Debug)]
+pub struct Note {
+	pub identifier: String,
+	pub content: String,
+}
+
+impl EditableStateItem for Note {
+	fn get_content_mut(&mut self) -> &mut String {
+		&mut self.content
+	}
+	fn get_content_ref(&mut self) -> &str {
+		&self.content
+	}
+	fn get_identifier_mut(&mut self) -> &mut String {
+		&mut self.identifier
+	}
+	fn new(s: String) -> Self {
+		Note {
+			identifier: Uuid::new_v4().to_string(),
+			content: s,
 		}
 	}
 }
