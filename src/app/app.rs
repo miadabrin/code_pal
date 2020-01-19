@@ -26,6 +26,7 @@ impl AppState {
 }
 
 pub struct App<'a> {
+    pub app_state: AppState,
     pub todo_items: ListTextEditor<TodoItem>,
     pub current_action: CodePalAction,
     pub title: &'a str,
@@ -34,17 +35,24 @@ pub struct App<'a> {
 }
 
 impl<'a> App<'a> {
-    pub fn new(title: &'a str, appstate: AppState) -> App<'a> {
-        App {
+    pub fn new(title: &'a str, app_state: AppState) -> App<'a> {
+        let mut a = App {
+            app_state,
             title,
             todo_items: ListTextEditor::new(
                 String::from("Todo Items"),
-                Some(appstate.todo_items.clone()),
+                None::<Rc<RefCell<Vec<TodoItem>>>>,
             ),
             current_action: CodePalAction::None,
             should_quit: false,
             tabs: TabsState::new(vec!["Notes"]),
-        }
+        };
+        a.init_state();
+        a
+    }
+
+    pub fn init_state(&mut self) {
+        self.todo_items.current_text = Some(self.app_state.todo_items.clone());
     }
 
     pub fn on_up(&mut self) {}
