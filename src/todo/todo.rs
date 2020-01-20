@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::rc::Rc;
 use uuid::Uuid;
@@ -9,7 +10,7 @@ pub trait EditableStateItem {
 	fn new(s: String) -> Self;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TodoItem {
 	pub identifier: String,
 	pub title: String,
@@ -37,7 +38,7 @@ impl EditableStateItem for TodoItem {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Note {
 	pub identifier: String,
 	pub content: String,

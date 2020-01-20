@@ -4,8 +4,18 @@ use crate::todo::todo::EditableStateItem;
 use crate::todo::todo::{Note, TodoItem};
 use crate::util::TabsState;
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
+use std::error::Error;
+use std::fs::File;
+use std::io::prelude::*;
 use std::rc::Rc;
+
+struct Person {
+    name: String,
+    age: u8,
+    phones: Vec<String>,
+}
 
 use std::sync::mpsc::Sender;
 
@@ -17,14 +27,44 @@ pub enum CodePalAction {
     None,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct AppState {
     pub todo_items: Rc<RefCell<Vec<TodoItem>>>,
 }
 
 impl AppState {
     pub fn new() -> AppState {
+        let mut pathbuf = dirs::home_dir().unwrap();
+        pathbuf.push("code_pal.json");
+        let path = pathbuf.as_path();
+        if path.exists() {
+            let json_file = File::open(path).expect("file not found");
+            let app_state: AppState =
+                serde_json::from_reader(json_file).expect("error while reading json");
+            return app_state;
+        }
         AppState {
             todo_items: Rc::new(RefCell::new(vec![TodoItem::new(String::from(""))])),
+        }
+    }
+    pub fn save(&mut self) {
+        let serialized = serde_json::to_string(&self).unwrap();
+
+        let mut pathbuf = dirs::home_dir().unwrap();
+        pathbuf.push("code_pal.json");
+        let path = pathbuf.as_path();
+        let display = path.display();
+
+        // Open a file in write-only mode, returns `io::Result<File>`
+        let mut file = match File::create(&path) {
+            Err(why) => panic!("couldn't create {}: {}", display, why.description()),
+            Ok(file) => file,
+        };
+
+        // Write the `LOREM_IPSUM` string to `file`, returns `io::Result<()>`
+        match file.write_all(serialized.as_bytes()) {
+            Err(why) => panic!("couldn't write to {}: {}", display, why.description()),
+            Ok(_) => {}
         }
     }
 }
@@ -113,6 +153,7 @@ impl<'a> App<'a> {
             }
             (KeyCode::Char('a'), KeyModifiers::CONTROL) => self.on_add_todo(),
             (KeyCode::Char('n'), KeyModifiers::CONTROL) => self.on_add_note(),
+            (KeyCode::Char('s'), KeyModifiers::CONTROL) => self.on_save(),
             (KeyCode::Esc, _) => self.on_stop_action(),
             _ => {
                 if let Some(x) = self.current_active_item() {
@@ -173,5 +214,9 @@ impl<'a> App<'a> {
                 }
             }
         }
+    }
+
+    pub fn on_save(&mut self) {
+        self.app_state.save();
     }
 }
