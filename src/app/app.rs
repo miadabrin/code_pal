@@ -80,11 +80,13 @@ impl<'a> App<'a> {
     }
 
     pub fn on_add_todo(&mut self) {
+        self.on_stop_action();
         self.current_action = CodePalAction::AddToDoItem;
         self.todo_items.on_activate();
     }
 
     pub fn on_add_note(&mut self) {
+        self.on_stop_action();
         self.current_action = CodePalAction::AddNote;
         self.notes.on_activate();
     }
