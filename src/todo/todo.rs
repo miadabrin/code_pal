@@ -6,7 +6,6 @@ use uuid::Uuid;
 pub trait EditableStateItem {
 	fn get_content_mut(&mut self) -> &mut String;
 	fn get_identifier_mut(&mut self) -> &mut String;
-	fn get_content_ref(&mut self) -> &str;
 	fn new(s: String) -> Self;
 }
 
@@ -21,9 +20,6 @@ pub struct TodoItem {
 impl EditableStateItem for TodoItem {
 	fn get_content_mut(&mut self) -> &mut String {
 		&mut self.title
-	}
-	fn get_content_ref(&mut self) -> &str {
-		&self.title
 	}
 	fn get_identifier_mut(&mut self) -> &mut String {
 		&mut self.identifier
@@ -47,9 +43,6 @@ pub struct Note {
 impl EditableStateItem for Note {
 	fn get_content_mut(&mut self) -> &mut String {
 		&mut self.content
-	}
-	fn get_content_ref(&mut self) -> &str {
-		&self.content
 	}
 	fn get_identifier_mut(&mut self) -> &mut String {
 		&mut self.identifier
