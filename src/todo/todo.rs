@@ -80,9 +80,10 @@ impl EditableRowItem for Project {
 	}
 	fn new(s: Vec<String>) -> Self {
 		let mut owned = s.to_owned();
-		let name = owned.pop().unwrap();
-		let url = owned.pop().unwrap();
-		let dir_location = owned.pop().unwrap();
+		let dir_location = owned.pop().unwrap_or_default();
+		let url = owned.pop().unwrap_or_default();
+		let name = owned.pop().unwrap_or_default();
+
 		Project {
 			identifier: Uuid::new_v4().to_string(),
 			name,

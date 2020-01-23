@@ -275,6 +275,25 @@ where
 			}
 		};
 	}
+	pub fn on_up(&mut self) {
+		self.select_item(match self.current_selection {
+			Some(x) if x > 0 => x - 1,
+			_ => 0,
+		});
+	}
+	pub fn on_down(&mut self) {
+		let item_ref = (*self.current_text.as_ref().unwrap()).clone();
+		let mut borrowed_item = item_ref.borrow_mut();
+		self.select_item(match self.current_selection {
+			Some(x) if x < borrowed_item.len() - 1 => x + 1,
+			Some(x) if x == borrowed_item.len() - 1 => {
+				let t = T::new(vec![]);
+				borrowed_item.push(t);
+				borrowed_item.len() - 1
+			}
+			_ => borrowed_item.len(),
+		});
+	}
 }
 
 impl<T> UIEventProcessor for TableEditor<T>
@@ -295,6 +314,8 @@ where
 				match (event.code, event.modifiers) {
 					(KeyCode::Char(c), _) => self.on_key(c, event.modifiers),
 					(KeyCode::Backspace, _) => self.on_backspace(),
+					(KeyCode::Up, _) => self.on_up(),
+					(KeyCode::Down, _) => self.on_down(),
 					(_, _) => {}
 				}
 			}
