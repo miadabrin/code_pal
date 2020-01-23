@@ -294,6 +294,42 @@ where
 			_ => borrowed_item.len(),
 		});
 	}
+
+	pub fn on_left(&mut self) {
+		let selected_index = match self.current_selection {
+			Some(selected_index) => selected_index,
+			None => 0,
+		};
+		let selected_header = match self.current_header_selection {
+			Some(selected_header) => selected_header,
+			None => 0,
+		};
+		let item_ref = (*self.current_text.as_ref().unwrap()).clone();
+		let mut borrowed_item = item_ref.borrow_mut();
+		if let Some(_) = borrowed_item.get_mut(selected_index) {
+			if selected_header > 0 {
+				self.select_header(selected_header - 1);
+			}
+		};
+	}
+	pub fn on_right(&mut self) {
+		let selected_index = match self.current_selection {
+			Some(selected_index) => selected_index,
+			None => 0,
+		};
+		let selected_header = match self.current_header_selection {
+			Some(selected_header) => selected_header,
+			None => 0,
+		};
+		let item_ref = (*self.current_text.as_ref().unwrap()).clone();
+		let mut borrowed_item = item_ref.borrow_mut();
+		if let Some(elem) = borrowed_item.get_mut(selected_index) {
+			let content = elem.get_content_mut(selected_header);
+			if selected_header < content.len() - 1 {
+				self.select_header(selected_header + 1);
+			}
+		};
+	}
 }
 
 impl<T> UIEventProcessor for TableEditor<T>
@@ -316,6 +352,8 @@ where
 					(KeyCode::Backspace, _) => self.on_backspace(),
 					(KeyCode::Up, _) => self.on_up(),
 					(KeyCode::Down, _) => self.on_down(),
+					(KeyCode::Right, _) => self.on_right(),
+					(KeyCode::Left, _) => self.on_left(),
 					(_, _) => {}
 				}
 			}
