@@ -1,6 +1,6 @@
 use crate::app::ui_component::{ListTextEditor, TableEditor, UIEventProcessor};
 use crate::app::{ActionPayload, Event};
-use crate::todo::todo::EditableStateItem;
+use crate::todo::todo::{EditableRowItem, EditableStateItem};
 use crate::todo::todo::{Note, Project, TodoItem};
 use crate::util::TabsState;
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
@@ -30,6 +30,12 @@ pub enum CodePalAction {
 #[derive(Serialize, Deserialize)]
 pub struct AppState {
     pub todo_items: Rc<RefCell<Vec<TodoItem>>>,
+    #[serde(default = "default_projects")]
+    pub projects: Rc<RefCell<Vec<Project>>>,
+}
+
+fn default_projects() -> Rc<RefCell<Vec<Project>>> {
+    Rc::new(RefCell::new(vec![]))
 }
 
 impl AppState {
@@ -45,6 +51,11 @@ impl AppState {
         }
         AppState {
             todo_items: Rc::new(RefCell::new(vec![TodoItem::new(String::from(""))])),
+            projects: Rc::new(RefCell::new(vec![Project::new(vec![
+                String::from(""),
+                String::from(""),
+                String::from(""),
+            ])])),
         }
     }
     pub fn save(&mut self) {
@@ -115,6 +126,7 @@ impl<'a> App<'a> {
 
     pub fn init_state(&mut self) {
         self.todo_items.current_text = Some(self.app_state.todo_items.clone());
+        self.projects.current_text = Some(self.app_state.projects.clone());
         self.set_notes();
     }
 
