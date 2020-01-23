@@ -201,6 +201,7 @@ where
 	pub current_text: Option<Rc<RefCell<Vec<T>>>>,
 	pub current_selection: Option<usize>,
 	pub current_header_selection: Option<usize>,
+	pub column_lengths: Vec<u16>,
 	pub headers: Vec<String>,
 	pub active: bool,
 	pub sender: Sender<Event>,
@@ -214,6 +215,7 @@ where
 		title: String,
 		initial_text: Option<Rc<RefCell<Vec<T>>>>,
 		headers: Vec<String>,
+		column_lengths: Vec<u16>,
 		sender: Sender<Event>,
 	) -> TableEditor<T> {
 		TableEditor {
@@ -221,6 +223,7 @@ where
 			current_text: initial_text,
 			current_selection: Option::None,
 			current_header_selection: Option::None,
+			column_lengths,
 			headers,
 			active: false,
 			sender,
@@ -247,6 +250,31 @@ where
 			content.push(c);
 		};
 	}
+	pub fn on_backspace(&mut self) {
+		let selected_index = match self.current_selection {
+			Some(selected_index) => selected_index,
+			None => 0,
+		};
+		let selected_header = match self.current_header_selection {
+			Some(selected_header) => selected_header,
+			None => 0,
+		};
+		let item_ref = (*self.current_text.as_ref().unwrap()).clone();
+		let mut borrowed_item = item_ref.borrow_mut();
+		if let Some(elem) = borrowed_item.get_mut(selected_index) {
+			let content = elem.get_content_mut(selected_header);
+			if content.len() > 0 {
+				content.pop();
+			} else {
+				if selected_header == 0 {
+					if selected_index >= 1 {
+						borrowed_item.remove(selected_index);
+						self.current_selection = Some(selected_index - 1);
+					}
+				}
+			}
+		};
+	}
 }
 
 impl<T> UIEventProcessor for TableEditor<T>
@@ -266,6 +294,7 @@ where
 			if self.active {
 				match (event.code, event.modifiers) {
 					(KeyCode::Char(c), _) => self.on_key(c, event.modifiers),
+					(KeyCode::Backspace, _) => self.on_backspace(),
 					(_, _) => {}
 				}
 			}
@@ -291,8 +320,10 @@ where
 			let rows = items
 				.iter()
 				.map(|s| Row::StyledData(s.into_iter(), Style::default()));
-			let constraints: Vec<_> = (0..self.headers.len())
-				.map(|_| Constraint::Length(15))
+			let constraints: Vec<_> = self
+				.column_lengths
+				.iter()
+				.map(|l| Constraint::Length(*l))
 				.collect();
 			Table::new(self.headers.iter(), rows)
 				.block(Block::default().title(&self.title).borders(Borders::ALL))

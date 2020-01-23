@@ -118,6 +118,7 @@ impl<'a> App<'a> {
                     String::from("url"),
                     String::from("Directory"),
                 ],
+                vec![20, 50, 50],
                 Sender::clone(&sender),
             ),
             current_action: CodePalAction::None,
