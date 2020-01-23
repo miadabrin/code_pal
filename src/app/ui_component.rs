@@ -1,4 +1,6 @@
 use crate::app::{ActionPayload, Event};
+use clipboard::ClipboardContext;
+use clipboard::ClipboardProvider;
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -329,6 +331,24 @@ where
 			}
 		};
 	}
+	pub fn on_paste(&mut self) {
+		let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
+		let selected_index = match self.current_selection {
+			Some(selected_index) => selected_index,
+			None => 0,
+		};
+		let selected_header = match self.current_header_selection {
+			Some(selected_header) => selected_header,
+			None => 0,
+		};
+		let item_ref = (*self.current_text.as_ref().unwrap()).clone();
+		if let Some(elem) = item_ref.borrow_mut().get_mut(selected_index) {
+			let content = elem.get_content_mut(selected_header);
+			if let Ok(received) = ctx.get_contents() {
+				*content = received;
+			}
+		};
+	}
 }
 
 impl<T> UIEventProcessor for TableEditor<T>
@@ -347,6 +367,7 @@ where
 		if let Some(_) = self.current_text {
 			if self.active {
 				match (event.code, event.modifiers) {
+					(KeyCode::Char('v'), KeyModifiers::CONTROL) => self.on_paste(),
 					(KeyCode::Char(c), _) => self.on_key(c, event.modifiers),
 					(KeyCode::Backspace, _) => self.on_backspace(),
 					(KeyCode::Up, _) => self.on_up(),
