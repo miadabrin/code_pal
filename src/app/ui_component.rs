@@ -67,6 +67,21 @@ where
 		};
 	}
 
+	pub fn on_paste(&mut self) {
+		let selected_index = match self.current_selection {
+			Some(selected_index) => selected_index,
+			None => 0,
+		};
+		let item_ref = (*self.current_text.as_ref().unwrap()).clone();
+		if let Some(elem) = item_ref.borrow_mut().get_mut(selected_index) {
+			let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
+			let content = elem.get_content_mut();
+			if let Ok(received) = ctx.get_contents() {
+				content.push_str(&received);
+			}
+		};
+	}
+
 	pub fn on_up(&mut self) {
 		self.select_item(match self.current_selection {
 			Some(x) if x > 0 => x - 1,
@@ -152,6 +167,7 @@ where
 		if let Some(_) = self.current_text {
 			if self.active {
 				match (event.code, event.modifiers) {
+					(KeyCode::Char('v'), KeyModifiers::CONTROL) => self.on_paste(),
 					(KeyCode::Char(c), _) => self.on_key(c, event.modifiers),
 					(KeyCode::Up, _) => self.on_up(),
 					(KeyCode::Down, _) => self.on_down(),
