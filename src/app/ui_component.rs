@@ -345,7 +345,7 @@ where
 		if let Some(elem) = item_ref.borrow_mut().get_mut(selected_index) {
 			let content = elem.get_content_mut(selected_header);
 			if let Ok(received) = ctx.get_contents() {
-				*content = received;
+				content.push_str(&received);
 			}
 		};
 	}
