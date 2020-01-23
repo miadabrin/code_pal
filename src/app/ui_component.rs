@@ -388,8 +388,8 @@ where
 					.into_iter()
 					.enumerate()
 					.map(|(ii, s)| match (selected_index, selected_header) {
-						(x, y) if x == i && y == ii && s == "" => "*",
-						_ => s,
+						(x, y) if x == i && y == ii => format!(">{}", s),
+						_ => s.to_string(),
 					})
 					.collect();
 				Row::StyledData(content_to_show.into_iter(), style)
