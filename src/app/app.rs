@@ -23,7 +23,7 @@ use std::sync::mpsc::Sender;
 pub enum CodePalAction {
     AddToDoItem,
     AddNote,
-    DescriptionEdit,
+    AddProject,
     None,
 }
 
@@ -35,7 +35,11 @@ pub struct AppState {
 }
 
 fn default_projects() -> Rc<RefCell<Vec<Project>>> {
-    Rc::new(RefCell::new(vec![]))
+    Rc::new(RefCell::new(vec![Project::new(vec![
+        String::from(""),
+        String::from(""),
+        String::from(""),
+    ])]))
 }
 
 impl AppState {
@@ -154,6 +158,12 @@ impl<'a> App<'a> {
         self.notes.on_activate();
     }
 
+    pub fn on_add_project(&mut self) {
+        self.on_stop_action();
+        self.current_action = CodePalAction::AddProject;
+        self.projects.on_activate();
+    }
+
     pub fn on_stop_action(&mut self) {
         if let Some(x) = self.current_active_item() {
             x.on_deactivate();
@@ -165,6 +175,7 @@ impl<'a> App<'a> {
         match self.current_action {
             CodePalAction::AddToDoItem => Some(&mut self.todo_items),
             CodePalAction::AddNote => Some(&mut self.notes),
+            CodePalAction::AddProject => Some(&mut self.projects),
             _ => None,
         }
     }
@@ -176,6 +187,7 @@ impl<'a> App<'a> {
             }
             (KeyCode::Char('a'), KeyModifiers::CONTROL) => self.on_add_todo(),
             (KeyCode::Char('n'), KeyModifiers::CONTROL) => self.on_add_note(),
+            (KeyCode::Char('p'), KeyModifiers::CONTROL) => self.on_add_project(),
             (KeyCode::Char('s'), KeyModifiers::CONTROL) => self.on_save(),
             (KeyCode::Esc, _) => self.on_stop_action(),
             _ => {
@@ -195,23 +207,9 @@ impl<'a> App<'a> {
         }
     }
 
-    pub fn on_enter(&mut self) {
-        /*
-        match self.tabs.index {
-            0 => {
-                self.current_action = CodePalAction::NoteEdit;
-            }
-            1 => {
-                self.current_action = CodePalAction::DescriptionEdit;
-            }
-            _ => {}
-        }
-        */
-    }
+    pub fn on_enter(&mut self) {}
 
-    pub fn on_tick(&mut self) {
-        // Update self values
-    }
+    pub fn on_tick(&mut self) {}
 
     pub fn set_notes(&mut self) {
         let item_ref = self.app_state.todo_items.clone();

@@ -226,6 +226,27 @@ where
 			sender,
 		}
 	}
+	pub fn select_item(&mut self, index: usize) {
+		self.current_selection = Some(index);
+	}
+	pub fn select_header(&mut self, index: usize) {
+		self.current_header_selection = Some(index);
+	}
+	pub fn on_key(&mut self, c: char, _: KeyModifiers) {
+		let selected_index = match self.current_selection {
+			Some(selected_index) => selected_index,
+			None => 0,
+		};
+		let selected_header = match self.current_header_selection {
+			Some(selected_header) => selected_header,
+			None => 0,
+		};
+		let item_ref = (*self.current_text.as_ref().unwrap()).clone();
+		if let Some(elem) = item_ref.borrow_mut().get_mut(selected_index) {
+			let content = elem.get_content_mut(selected_header);
+			content.push(c);
+		};
+	}
 }
 
 impl<T> UIEventProcessor for TableEditor<T>
@@ -237,11 +258,14 @@ where
 	}
 	fn on_activate(&mut self) {
 		self.active = true;
+		self.select_item(0);
+		self.select_header(0);
 	}
 	fn on_event(&mut self, event: KeyEvent) {
 		if let Some(_) = self.current_text {
 			if self.active {
 				match (event.code, event.modifiers) {
+					(KeyCode::Char(c), _) => self.on_key(c, event.modifiers),
 					(_, _) => {}
 				}
 			}
