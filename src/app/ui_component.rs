@@ -367,17 +367,33 @@ where
 	where
 		B: Backend,
 	{
+		let selected_index = match self.current_selection {
+			Some(selected_index) => selected_index,
+			None => 0,
+		};
+		let selected_header = match self.current_header_selection {
+			Some(selected_header) => selected_header,
+			None => 0,
+		};
 		if let Some(x) = self.current_text.as_ref() {
 			let item_ref = (*x).clone();
 			let mut borrowed_item = item_ref.borrow_mut();
-
-			let items: Vec<_> = borrowed_item
-				.iter_mut()
-				.map(|s| s.get_content_vector())
-				.collect();
-			let rows = items
-				.iter()
-				.map(|s| Row::StyledData(s.into_iter(), Style::default()));
+			let rows = borrowed_item.iter_mut().enumerate().map(|(i, elem)| {
+				let style = match selected_index {
+					x if x == i => Style::default().fg(Color::Yellow),
+					_ => Style::default(),
+				};
+				let content_to_show: Vec<_> = elem
+					.get_content_vector()
+					.into_iter()
+					.enumerate()
+					.map(|(ii, s)| match (selected_index, selected_header) {
+						(x, y) if x == i && y == ii && s == "" => "*",
+						_ => s,
+					})
+					.collect();
+				Row::StyledData(content_to_show.into_iter(), style)
+			});
 			let constraints: Vec<_> = self
 				.column_lengths
 				.iter()
