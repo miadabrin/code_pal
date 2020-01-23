@@ -324,8 +324,7 @@ where
 		let item_ref = (*self.current_text.as_ref().unwrap()).clone();
 		let mut borrowed_item = item_ref.borrow_mut();
 		if let Some(elem) = borrowed_item.get_mut(selected_index) {
-			let content = elem.get_content_mut(selected_header);
-			if selected_header < content.len() - 1 {
+			if selected_header < elem.get_content_vector().len() - 1 {
 				self.select_header(selected_header + 1);
 			}
 		};
