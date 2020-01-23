@@ -1,7 +1,7 @@
-use crate::app::ui_component::{ListTextEditor, UIEventProcessor};
+use crate::app::ui_component::{ListTextEditor, TableEditor, UIEventProcessor};
 use crate::app::{ActionPayload, Event};
 use crate::todo::todo::EditableStateItem;
-use crate::todo::todo::{Note, TodoItem};
+use crate::todo::todo::{Note, Project, TodoItem};
 use crate::util::TabsState;
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use serde::{Deserialize, Serialize};
@@ -73,6 +73,7 @@ pub struct App<'a> {
     pub app_state: AppState,
     pub todo_items: ListTextEditor<TodoItem>,
     pub notes: ListTextEditor<Note>,
+    pub projects: TableEditor<Project>,
     pub current_action: CodePalAction,
     pub title: &'a str,
     pub should_quit: bool,
@@ -94,9 +95,19 @@ impl<'a> App<'a> {
                 None::<Rc<RefCell<Vec<Note>>>>,
                 Sender::clone(&sender),
             ),
+            projects: TableEditor::new(
+                String::from("Projects"),
+                None::<Rc<RefCell<Vec<Project>>>>,
+                vec![
+                    String::from("Name"),
+                    String::from("url"),
+                    String::from("Directory"),
+                ],
+                Sender::clone(&sender),
+            ),
             current_action: CodePalAction::None,
             should_quit: false,
-            tabs: TabsState::new(vec!["Notes"]),
+            tabs: TabsState::new(vec!["Notes", "Projects"]),
         };
         a.init_state();
         a

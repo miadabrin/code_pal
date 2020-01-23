@@ -4,12 +4,13 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::mpsc::Sender;
 use tui::backend::Backend;
+use tui::layout::Constraint;
 use tui::layout::Rect;
 use tui::style::{Color, Modifier, Style};
-use tui::widgets::{Block, Borders, SelectableList, Widget};
+use tui::widgets::{Block, Borders, Row, SelectableList, Table, Widget};
 use tui::Frame;
 
-use crate::todo::todo::EditableStateItem;
+use crate::todo::todo::{EditableRowItem, EditableStateItem};
 
 pub trait UIEventProcessor {
 	fn on_deactivate(&mut self) {}
@@ -187,6 +188,92 @@ where
 				.select(self.current_selection)
 				.highlight_style(Style::default().fg(Color::Yellow).modifier(Modifier::BOLD))
 				.highlight_symbol(selection_symbol)
+				.render(f, area);
+		}
+	}
+}
+
+pub struct TableEditor<T>
+where
+	T: EditableRowItem,
+{
+	pub title: String,
+	pub current_text: Option<Rc<RefCell<Vec<T>>>>,
+	pub current_selection: Option<usize>,
+	pub current_header_selection: Option<usize>,
+	pub headers: Vec<String>,
+	pub active: bool,
+	pub sender: Sender<Event>,
+}
+
+impl<T> TableEditor<T>
+where
+	T: EditableRowItem,
+{
+	pub fn new(
+		title: String,
+		initial_text: Option<Rc<RefCell<Vec<T>>>>,
+		headers: Vec<String>,
+		sender: Sender<Event>,
+	) -> TableEditor<T> {
+		TableEditor {
+			title,
+			current_text: initial_text,
+			current_selection: Option::None,
+			current_header_selection: Option::None,
+			headers,
+			active: false,
+			sender,
+		}
+	}
+}
+
+impl<T> UIEventProcessor for TableEditor<T>
+where
+	T: EditableRowItem,
+{
+	fn on_deactivate(&mut self) {
+		self.active = false
+	}
+	fn on_activate(&mut self) {
+		self.active = true;
+	}
+	fn on_event(&mut self, event: KeyEvent) {
+		if let Some(_) = self.current_text {
+			if self.active {
+				match (event.code, event.modifiers) {
+					(_, _) => {}
+				}
+			}
+		}
+	}
+}
+impl<T> UIComponent for TableEditor<T>
+where
+	T: EditableRowItem,
+{
+	fn draw<B>(&mut self, f: &mut Frame<B>, area: Rect)
+	where
+		B: Backend,
+	{
+		if let Some(x) = self.current_text.as_ref() {
+			let item_ref = (*x).clone();
+			let mut borrowed_item = item_ref.borrow_mut();
+
+			let items: Vec<_> = borrowed_item
+				.iter_mut()
+				.map(|s| s.get_content_vector())
+				.collect();
+			let rows = items
+				.iter()
+				.map(|s| Row::StyledData(s.into_iter(), Style::default()));
+			let constraints: Vec<_> = (0..self.headers.len())
+				.map(|_| Constraint::Length(15))
+				.collect();
+			Table::new(self.headers.iter(), rows)
+				.block(Block::default().title(&self.title).borders(Borders::ALL))
+				.header_style(Style::default().fg(Color::Yellow))
+				.widths(&constraints)
 				.render(f, area);
 		}
 	}

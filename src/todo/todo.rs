@@ -54,3 +54,46 @@ impl EditableStateItem for Note {
 		}
 	}
 }
+
+pub struct Project {
+	pub identifier: String,
+	pub name: String,
+	pub url: String,
+	pub dir_location: String,
+}
+
+impl EditableRowItem for Project {
+	fn get_content_vector(&mut self) -> Vec<&str> {
+		vec![&self.name, &self.url, &self.dir_location]
+	}
+	fn get_content_mut(&mut self, index: usize) -> &mut String {
+		match index {
+			0 => &mut self.name,
+			1 => &mut self.url,
+			2 => &mut self.dir_location,
+			_ => &mut self.name,
+		}
+	}
+	fn get_identifier_mut(&mut self) -> &mut String {
+		&mut self.identifier
+	}
+	fn new(s: Vec<String>) -> Self {
+		let mut owned = s.to_owned();
+		let name = owned.pop().unwrap();
+		let url = owned.pop().unwrap();
+		let dir_location = owned.pop().unwrap();
+		Project {
+			identifier: Uuid::new_v4().to_string(),
+			name,
+			url,
+			dir_location,
+		}
+	}
+}
+
+pub trait EditableRowItem {
+	fn get_content_vector(&mut self) -> Vec<&str>;
+	fn get_content_mut(&mut self, index: usize) -> &mut String;
+	fn get_identifier_mut(&mut self) -> &mut String;
+	fn new(s: Vec<String>) -> Self;
+}

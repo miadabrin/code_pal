@@ -22,6 +22,7 @@ pub fn draw<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<(),
             .render(&mut f, chunks[0]);
         match app.tabs.index {
             0 => draw_first_tab(&mut f, app, chunks[1]),
+            1 => draw_second_tab(&mut f, app, chunks[1]),
             _ => {}
         };
     })
@@ -36,4 +37,14 @@ where
         .split(area);
     app.todo_items.draw(f, chunks[0]);
     app.notes.draw(f, chunks[1]);
+}
+
+fn draw_second_tab<B>(f: &mut Frame<B>, app: &mut App, area: Rect)
+where
+    B: Backend,
+{
+    let chunks = Layout::default()
+        .constraints([Constraint::Min(7)].as_ref())
+        .split(area);
+    app.projects.draw(f, chunks[0]);
 }
