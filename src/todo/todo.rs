@@ -55,7 +55,7 @@ impl EditableStateItem for Note {
 	}
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Project {
 	pub identifier: String,
 	pub name: String,

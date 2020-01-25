@@ -1,7 +1,7 @@
 use crate::app::ui_component::{AutoCompleteEditor, ListTextEditor, TableEditor, UIEventProcessor};
 use crate::app::{ActionPayload, Event};
 use crate::todo::todo::{EditableRowItem, EditableStateItem};
-use crate::todo::todo::{Note, Project, TodoItem};
+use crate::todo::todo::{Note, Project, SelectableItem, TodoItem};
 use crate::util::TabsState;
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use serde::{Deserialize, Serialize};
@@ -127,6 +127,7 @@ impl<'a> App<'a> {
                 String::from("Project"),
                 String::from(""),
                 vec![],
+                sender,
             ),
             current_action: CodePalAction::None,
             should_quit: false,
@@ -246,12 +247,31 @@ impl<'a> App<'a> {
         };
     }
 
+    pub fn set_project_suggestions(&mut self, text: &str) {
+        let item_ref = self.app_state.projects.clone();
+        let borrowed = item_ref.borrow();
+        let mut cloned_list: Vec<_> = borrowed.iter().map(|x| x.clone()).collect();
+        let mut i = 0;
+        while i != cloned_list.len() {
+            if !cloned_list[i].get_name().contains(text) {
+                cloned_list.remove(i);
+            } else {
+                i += 1;
+            }
+        }
+        self.todo_item_project.current_suggestions = cloned_list;
+        self.todo_item_project.select_suggestion(Some(0));
+    }
+
     pub fn on_action(&mut self, action: ActionPayload) {
         match action {
             ActionPayload::Selection(sender, _) => {
                 if sender == "Todo Items" {
                     self.set_notes();
                 }
+            }
+            ActionPayload::Text(text) => {
+                self.set_project_suggestions(&text);
             }
         }
     }

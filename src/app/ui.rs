@@ -33,7 +33,7 @@ where
     B: Backend,
 {
     let chunks = Layout::default()
-        .constraints([Constraint::Length(7), Constraint::Min(7)].as_ref())
+        .constraints([Constraint::Length(10), Constraint::Min(7)].as_ref())
         .split(area);
 
     let horizontal_chunks = Layout::default()

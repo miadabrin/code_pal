@@ -454,13 +454,19 @@ where
 	pub current_suggestions: Vec<T>,
 	pub current_selection: Option<usize>,
 	pub current_chosen: Option<String>,
+	pub sender: Sender<Event>,
 }
 
 impl<T> AutoCompleteEditor<T>
 where
 	T: SelectableItem,
 {
-	pub fn new(title: String, text: String, current_suggestions: Vec<T>) -> AutoCompleteEditor<T> {
+	pub fn new(
+		title: String,
+		text: String,
+		current_suggestions: Vec<T>,
+		sender: Sender<Event>,
+	) -> AutoCompleteEditor<T> {
 		AutoCompleteEditor {
 			active: false,
 			title,
@@ -468,24 +474,38 @@ where
 			current_suggestions,
 			current_selection: None,
 			current_chosen: None,
+			sender,
 		}
 	}
 
 	pub fn on_key(&mut self, c: char, _: KeyModifiers) {
 		self.text.push(c);
+		self.broadcast_text();
 	}
 
 	pub fn on_backspace(&mut self) {
 		if self.text.len() > 0 {
 			self.text.pop();
+			self.broadcast_text();
 		} else {
 			if let Some(x) = &self.current_chosen {
 				if x.len() > 0 {
 					self.current_chosen = Some(String::from(""));
 					self.text = String::from("");
+					self.broadcast_text();
 				}
 			}
 		}
+	}
+
+	pub fn broadcast_text(&mut self) {
+		self.sender
+			.send(Event::Action(ActionPayload::Text(self.text.clone())))
+			.unwrap_or_default();
+	}
+
+	pub fn select_suggestion(&mut self, index: Option<usize>) {
+		self.current_selection = index;
 	}
 }
 
