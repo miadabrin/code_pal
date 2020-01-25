@@ -507,6 +507,20 @@ where
 	pub fn select_suggestion(&mut self, index: Option<usize>) {
 		self.current_selection = index;
 	}
+
+	pub fn on_up(&mut self) {
+		self.select_suggestion(match self.current_selection {
+			Some(x) if x > 0 => Some(x - 1),
+			_ => Some(0),
+		});
+	}
+	pub fn on_down(&mut self) {
+		self.select_suggestion(match self.current_selection {
+			Some(x) if x < self.current_suggestions.len() - 1 => Some(x + 1),
+			Some(x) => Some(x),
+			None => None,
+		});
+	}
 }
 
 impl<T> UIComponent for AutoCompleteEditor<T>
@@ -563,12 +577,8 @@ where
 				//(KeyCode::Char('v'), KeyModifiers::CONTROL) => self.on_paste(),
 				(KeyCode::Char(c), _) => self.on_key(c, event.modifiers),
 				(KeyCode::Backspace, _) => self.on_backspace(),
-				/*
 				(KeyCode::Up, _) => self.on_up(),
 				(KeyCode::Down, _) => self.on_down(),
-				(KeyCode::Right, _) => self.on_right(),
-				(KeyCode::Left, _) => self.on_left(),
-				*/
 				(_, _) => {}
 			}
 		}
