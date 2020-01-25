@@ -24,6 +24,7 @@ pub enum CodePalAction {
     AddToDoItem,
     AddNote,
     AddProject,
+    SelectProject,
     None,
 }
 
@@ -171,6 +172,12 @@ impl<'a> App<'a> {
         self.projects.on_activate();
     }
 
+    pub fn on_select_project(&mut self) {
+        self.on_stop_action();
+        self.current_action = CodePalAction::SelectProject;
+        self.todo_item_project.on_activate();
+    }
+
     pub fn on_stop_action(&mut self) {
         if let Some(x) = self.current_active_item() {
             x.on_deactivate();
@@ -183,6 +190,7 @@ impl<'a> App<'a> {
             CodePalAction::AddToDoItem => Some(&mut self.todo_items),
             CodePalAction::AddNote => Some(&mut self.notes),
             CodePalAction::AddProject => Some(&mut self.projects),
+            CodePalAction::SelectProject => Some(&mut self.todo_item_project),
             _ => None,
         }
     }
@@ -194,7 +202,11 @@ impl<'a> App<'a> {
             }
             (KeyCode::Char('a'), KeyModifiers::CONTROL) => self.on_add_todo(),
             (KeyCode::Char('n'), KeyModifiers::CONTROL) => self.on_add_note(),
-            (KeyCode::Char('p'), KeyModifiers::CONTROL) => self.on_add_project(),
+            (KeyCode::Char('p'), KeyModifiers::CONTROL) => match self.tabs.index {
+                0 => self.on_select_project(),
+                1 => self.on_add_project(),
+                _ => {}
+            },
             (KeyCode::Char('s'), KeyModifiers::CONTROL) => self.on_save(),
             (KeyCode::Esc, _) => self.on_stop_action(),
             _ => {

@@ -448,6 +448,7 @@ pub struct AutoCompleteEditor<T>
 where
 	T: SelectableItem,
 {
+	pub active: bool,
 	pub title: String,
 	pub text: String,
 	pub current_suggestions: Vec<T>,
@@ -461,11 +462,29 @@ where
 {
 	pub fn new(title: String, text: String, current_suggestions: Vec<T>) -> AutoCompleteEditor<T> {
 		AutoCompleteEditor {
+			active: false,
 			title,
 			text,
 			current_suggestions,
 			current_selection: None,
 			current_chosen: None,
+		}
+	}
+
+	pub fn on_key(&mut self, c: char, _: KeyModifiers) {
+		self.text.push(c);
+	}
+
+	pub fn on_backspace(&mut self) {
+		if self.text.len() > 0 {
+			self.text.pop();
+		} else {
+			if let Some(x) = &self.current_chosen {
+				if x.len() > 0 {
+					self.current_chosen = Some(String::from(""));
+					self.text = String::from("");
+				}
+			}
 		}
 	}
 }
@@ -479,7 +498,7 @@ where
 		B: Backend,
 	{
 		let chunks = Layout::default()
-			.constraints([Constraint::Length(2), Constraint::Min(1)].as_ref())
+			.constraints([Constraint::Length(3), Constraint::Min(1)].as_ref())
 			.split(area);
 		let items: Vec<_> = self
 			.current_suggestions
@@ -492,8 +511,8 @@ where
 			.block(
 				Block::default()
 					.borders(Borders::ALL)
-					.title("-")
-					.title_style(Style::default().fg(Color::Magenta).modifier(Modifier::BOLD)),
+					.title("Find ...")
+					.title_style(Style::default()),
 			)
 			.wrap(true)
 			.render(f, chunks[0]);
@@ -505,5 +524,33 @@ where
 			.highlight_style(Style::default().fg(Color::Yellow).modifier(Modifier::BOLD))
 			.highlight_symbol(">")
 			.render(f, chunks[1]);
+	}
+}
+
+impl<T> UIEventProcessor for AutoCompleteEditor<T>
+where
+	T: SelectableItem,
+{
+	fn on_deactivate(&mut self) {
+		self.active = false
+	}
+	fn on_activate(&mut self) {
+		self.active = true;
+	}
+	fn on_event(&mut self, event: KeyEvent) {
+		if self.active {
+			match (event.code, event.modifiers) {
+				//(KeyCode::Char('v'), KeyModifiers::CONTROL) => self.on_paste(),
+				(KeyCode::Char(c), _) => self.on_key(c, event.modifiers),
+				(KeyCode::Backspace, _) => self.on_backspace(),
+				/*
+				(KeyCode::Up, _) => self.on_up(),
+				(KeyCode::Down, _) => self.on_down(),
+				(KeyCode::Right, _) => self.on_right(),
+				(KeyCode::Left, _) => self.on_left(),
+				*/
+				(_, _) => {}
+			}
+		}
 	}
 }
