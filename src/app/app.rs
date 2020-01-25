@@ -1,4 +1,4 @@
-use crate::app::ui_component::{ListTextEditor, TableEditor, UIEventProcessor};
+use crate::app::ui_component::{AutoCompleteEditor, ListTextEditor, TableEditor, UIEventProcessor};
 use crate::app::{ActionPayload, Event};
 use crate::todo::todo::{EditableRowItem, EditableStateItem};
 use crate::todo::todo::{Note, Project, TodoItem};
@@ -89,6 +89,7 @@ pub struct App<'a> {
     pub todo_items: ListTextEditor<TodoItem>,
     pub notes: ListTextEditor<Note>,
     pub projects: TableEditor<Project>,
+    pub todo_item_project: AutoCompleteEditor<Project>,
     pub current_action: CodePalAction,
     pub title: &'a str,
     pub should_quit: bool,
@@ -120,6 +121,11 @@ impl<'a> App<'a> {
                 ],
                 vec![20, 50, 50],
                 Sender::clone(&sender),
+            ),
+            todo_item_project: AutoCompleteEditor::new(
+                String::from("Project"),
+                String::from(""),
+                vec![],
             ),
             current_action: CodePalAction::None,
             should_quit: false,

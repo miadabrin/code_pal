@@ -99,3 +99,17 @@ pub trait EditableRowItem {
 	fn get_identifier_mut(&mut self) -> &mut String;
 	fn new(s: Vec<String>) -> Self;
 }
+
+pub trait SelectableItem {
+	fn get_identifier(&mut self) -> String;
+	fn get_name(&mut self) -> String;
+}
+
+impl SelectableItem for Project {
+	fn get_identifier(&mut self) -> String {
+		self.identifier.clone()
+	}
+	fn get_name(&mut self) -> String {
+		self.name.clone()
+	}
+}

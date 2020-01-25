@@ -6,13 +6,12 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::mpsc::Sender;
 use tui::backend::Backend;
-use tui::layout::Constraint;
-use tui::layout::Rect;
+use tui::layout::{Constraint, Layout, Rect};
 use tui::style::{Color, Modifier, Style};
-use tui::widgets::{Block, Borders, Row, SelectableList, Table, Widget};
+use tui::widgets::{Block, Borders, Paragraph, Row, SelectableList, Table, Text, Widget};
 use tui::Frame;
 
-use crate::todo::todo::{EditableRowItem, EditableStateItem};
+use crate::todo::todo::{EditableRowItem, EditableStateItem, SelectableItem};
 
 pub trait UIEventProcessor {
 	fn on_deactivate(&mut self) {}
@@ -442,5 +441,69 @@ where
 				.widths(&constraints)
 				.render(f, area);
 		}
+	}
+}
+
+pub struct AutoCompleteEditor<T>
+where
+	T: SelectableItem,
+{
+	pub title: String,
+	pub text: String,
+	pub current_suggestions: Vec<T>,
+	pub current_selection: Option<usize>,
+	pub current_chosen: Option<String>,
+}
+
+impl<T> AutoCompleteEditor<T>
+where
+	T: SelectableItem,
+{
+	pub fn new(title: String, text: String, current_suggestions: Vec<T>) -> AutoCompleteEditor<T> {
+		AutoCompleteEditor {
+			title,
+			text,
+			current_suggestions,
+			current_selection: None,
+			current_chosen: None,
+		}
+	}
+}
+
+impl<T> UIComponent for AutoCompleteEditor<T>
+where
+	T: SelectableItem,
+{
+	fn draw<B>(&mut self, f: &mut Frame<B>, area: Rect)
+	where
+		B: Backend,
+	{
+		let chunks = Layout::default()
+			.constraints([Constraint::Length(2), Constraint::Min(1)].as_ref())
+			.split(area);
+		let items: Vec<_> = self
+			.current_suggestions
+			.iter_mut()
+			.map(|x| (x.get_name()))
+			.collect();
+		let text = [Text::raw(self.text.clone())];
+
+		Paragraph::new(text.iter())
+			.block(
+				Block::default()
+					.borders(Borders::ALL)
+					.title("-")
+					.title_style(Style::default().fg(Color::Magenta).modifier(Modifier::BOLD)),
+			)
+			.wrap(true)
+			.render(f, chunks[0]);
+
+		SelectableList::default()
+			.block(Block::default().borders(Borders::ALL).title(&self.title))
+			.items(&items)
+			.select(self.current_selection)
+			.highlight_style(Style::default().fg(Color::Yellow).modifier(Modifier::BOLD))
+			.highlight_symbol(">")
+			.render(f, chunks[1]);
 	}
 }

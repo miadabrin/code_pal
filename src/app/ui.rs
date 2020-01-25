@@ -1,7 +1,7 @@
 use std::io;
 
 use tui::backend::Backend;
-use tui::layout::{Constraint, Layout, Rect};
+use tui::layout::{Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Style};
 use tui::widgets::{Block, Borders, Tabs, Widget};
 use tui::{Frame, Terminal};
@@ -35,7 +35,13 @@ where
     let chunks = Layout::default()
         .constraints([Constraint::Length(7), Constraint::Min(7)].as_ref())
         .split(area);
-    app.todo_items.draw(f, chunks[0]);
+
+    let horizontal_chunks = Layout::default()
+        .constraints([Constraint::Percentage(35), Constraint::Percentage(65)].as_ref())
+        .direction(Direction::Horizontal)
+        .split(chunks[0]);
+    app.todo_items.draw(f, horizontal_chunks[0]);
+    app.todo_item_project.draw(f, horizontal_chunks[1]);
     app.notes.draw(f, chunks[1]);
 }
 
