@@ -13,6 +13,8 @@ pub trait EditableStateItem {
 pub struct TodoItem {
 	pub identifier: String,
 	pub title: String,
+	#[serde(default)]
+	pub project_identifier: String,
 	pub description: Vec<String>,
 	pub notes: Rc<RefCell<Vec<Note>>>,
 }
@@ -30,6 +32,7 @@ impl EditableStateItem for TodoItem {
 			title: s,
 			description: vec![],
 			notes: Rc::new(RefCell::new(vec![Note::new(String::from(""))])),
+			project_identifier: String::from(""),
 		}
 	}
 }

@@ -263,6 +263,21 @@ impl<'a> App<'a> {
         self.todo_item_project.select_suggestion(Some(0));
     }
 
+    pub fn set_project(&mut self, identifier: &str) {
+        let item_ref = self.app_state.todo_items.clone();
+        let selected_index = self.todo_items.current_selection;
+        match selected_index {
+            Some(index) => {
+                let mut borrowed = item_ref.borrow_mut();
+                let todo = borrowed.get_mut(index).unwrap();
+                todo.project_identifier = identifier.to_string();
+            }
+            None => {
+                self.notes.current_text = None;
+            }
+        };
+    }
+
     pub fn on_action(&mut self, action: ActionPayload) {
         match action {
             ActionPayload::Selection(sender, _) => {
@@ -272,6 +287,11 @@ impl<'a> App<'a> {
             }
             ActionPayload::Text(text) => {
                 self.set_project_suggestions(&text);
+            }
+            ActionPayload::TextSelection(sender, identifier) => {
+                if sender == "Project" {
+                    self.set_project(&identifier);
+                }
             }
         }
     }

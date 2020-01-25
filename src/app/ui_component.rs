@@ -504,8 +504,26 @@ where
 			.unwrap_or_default();
 	}
 
+	pub fn broadcast_selection(&mut self) {
+		self.sender
+			.send(Event::Action(ActionPayload::TextSelection(
+				self.title.clone(),
+				self.text.clone(),
+			)))
+			.unwrap_or_default();
+	}
+
 	pub fn select_suggestion(&mut self, index: Option<usize>) {
 		self.current_selection = index;
+	}
+
+	pub fn set_text_to_choice(&mut self) {
+		match self.current_selection {
+			Some(x) => {
+				self.text = self.current_suggestions.get_mut(x).unwrap().get_name();
+			}
+			_ => {}
+		}
 	}
 
 	pub fn on_up(&mut self) {
@@ -513,6 +531,7 @@ where
 			Some(x) if x > 0 => Some(x - 1),
 			_ => Some(0),
 		});
+		self.set_text_to_choice();
 	}
 	pub fn on_down(&mut self) {
 		self.select_suggestion(match self.current_selection {
@@ -520,6 +539,10 @@ where
 			Some(x) => Some(x),
 			None => None,
 		});
+		self.set_text_to_choice();
+	}
+	pub fn on_enter(&mut self) {
+		self.broadcast_selection();
 	}
 }
 
@@ -574,11 +597,11 @@ where
 	fn on_event(&mut self, event: KeyEvent) {
 		if self.active {
 			match (event.code, event.modifiers) {
-				//(KeyCode::Char('v'), KeyModifiers::CONTROL) => self.on_paste(),
 				(KeyCode::Char(c), _) => self.on_key(c, event.modifiers),
 				(KeyCode::Backspace, _) => self.on_backspace(),
 				(KeyCode::Up, _) => self.on_up(),
 				(KeyCode::Down, _) => self.on_down(),
+				(KeyCode::Enter, _) => self.on_enter(),
 				(_, _) => {}
 			}
 		}
