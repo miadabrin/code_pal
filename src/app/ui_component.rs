@@ -550,6 +550,12 @@ where
 		self.set_text_to_choice();
 	}
 	pub fn on_enter(&mut self) {
+		match self.current_selection {
+			Some(x) => {
+				self.text = self.current_suggestions.get_mut(x).unwrap().get_name();
+			}
+			None => {}
+		}
 		self.broadcast_selection();
 	}
 }
