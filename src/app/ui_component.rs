@@ -505,12 +505,20 @@ where
 	}
 
 	pub fn broadcast_selection(&mut self) {
-		self.sender
-			.send(Event::Action(ActionPayload::TextSelection(
-				self.title.clone(),
-				self.text.clone(),
-			)))
-			.unwrap_or_default();
+		match self.current_selection {
+			Some(x) => {
+				self.sender
+					.send(Event::Action(ActionPayload::TextSelection(
+						self.title.clone(),
+						self.current_suggestions
+							.get_mut(x)
+							.unwrap()
+							.get_identifier(),
+					)))
+					.unwrap_or_default();
+			}
+			None => {}
+		}
 	}
 
 	pub fn select_suggestion(&mut self, index: Option<usize>) {

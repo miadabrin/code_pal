@@ -247,6 +247,35 @@ impl<'a> App<'a> {
         };
     }
 
+    pub fn set_todo_item_project_suggestions(&mut self) {
+        let item_ref = self.app_state.todo_items.clone();
+        let selected_index = self.todo_items.current_selection;
+        match selected_index {
+            Some(index) => {
+                let mut borrowed = item_ref.borrow_mut();
+                let todo = borrowed.get_mut(index).unwrap();
+                let borrowed_projects_ref = self.app_state.projects.clone();
+                let borrowed_projects = borrowed_projects_ref.borrow();
+                let items: Vec<_> = borrowed_projects
+                    .iter()
+                    .filter(|x| x.identifier == todo.project_identifier)
+                    .collect();
+                if items.len() > 0 {
+                    let project_name = &items.get(0).unwrap().name;
+                    self.todo_item_project.text = project_name.clone();
+                    self.set_project_suggestions(&project_name);
+                } else {
+                    self.todo_item_project.text = String::from("");
+                    self.set_project_suggestions("");
+                }
+            }
+            None => {
+                self.todo_item_project.text = String::from("");
+                self.set_project_suggestions("");
+            }
+        };
+    }
+
     pub fn set_project_suggestions(&mut self, text: &str) {
         let item_ref = self.app_state.projects.clone();
         let borrowed = item_ref.borrow();
@@ -283,6 +312,7 @@ impl<'a> App<'a> {
             ActionPayload::Selection(sender, _) => {
                 if sender == "Todo Items" {
                     self.set_notes();
+                    self.set_todo_item_project_suggestions();
                 }
             }
             ActionPayload::Text(text) => {
