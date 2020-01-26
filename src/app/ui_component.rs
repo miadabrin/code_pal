@@ -568,8 +568,13 @@ where
 	where
 		B: Backend,
 	{
+		Block::default()
+			.borders(Borders::ALL)
+			.title(&self.title)
+			.render(f, area);
 		let chunks = Layout::default()
 			.constraints([Constraint::Length(3), Constraint::Min(1)].as_ref())
+			.margin(1)
 			.split(area);
 		let items: Vec<_> = self
 			.current_suggestions
@@ -589,7 +594,7 @@ where
 			.render(f, chunks[0]);
 
 		SelectableList::default()
-			.block(Block::default().borders(Borders::ALL).title(&self.title))
+			.block(Block::default().borders(Borders::ALL).title("Options"))
 			.items(&items)
 			.select(self.current_selection)
 			.highlight_style(Style::default().fg(Color::Yellow).modifier(Modifier::BOLD))
